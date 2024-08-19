@@ -208,8 +208,8 @@ class Monitor(object):
     def plot_map(self):
 
         resolution = [0, 0]
-        resolution[0] = self.resolution[0] / self.downsample_rate
-        resolution[1] = self.resolution[1] / self.downsample_rate
+        resolution[0] = int(self.resolution[0] / self.downsample_rate)
+        resolution[1] = int(self.resolution[1] / self.downsample_rate)
 
         mapcorX, mapcorY = np.meshgrid(range(resolution[1]), range(resolution[0]))
 
