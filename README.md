@@ -34,18 +34,18 @@ We are planning on occasional updating this tool with no fixed schedule. Communi
 
 #### Language:
 
-1. python 3.7
+1. python 3.8
 
 
 #### Install:
-```
+```sh
 cd <package_path>
-conda env create --name warpedvisualstim python=3.7
-activate warpedvisualstim (Windows)
-source activate warpedvisualstim (Mac or Linux)
+conda env create -f environment.yml # use 3.8.10 for latest psychopy
+PYTHONIOENCODING=utf8 conda activate warpedvisualstim # (Windows) https://stackoverflow.com/questions/59974715/conda-unicodeencodeerror-charmap-codec-cant-encode-character-u2580-in-po
+source activate warpedvisualstim # (Mac or Linux)
 python setup.py install
-pip install psychopy
-pip install pytest
+# pip install psychopy==2023.1.0
+# pip install pytest
 ```
 
 
@@ -73,3 +73,4 @@ install page in documentation (`doc` branch).
 
 1. Most image analysis parameters are defined as number of pixels, not microns.
 2. Works in windows, but not fully tested on Mac and Linux.
+3. You can delete conda env with `conda remove --name warpedvisualstim --all`.
