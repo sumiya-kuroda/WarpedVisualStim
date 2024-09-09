@@ -5,6 +5,7 @@ channels:
 dependencies:
   - pip==21.3.1
   - python==3.8.10
+  - wxPython # For ubuntu 16.04
   - pip:
     - setuptools==60.2.0
     - wheel==0.37.1
