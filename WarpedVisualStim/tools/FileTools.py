@@ -7,6 +7,7 @@ import shutil
 import h5py
 import datetime
 from . import ImageAnalysis as ia
+import json
 
 try:
     import tifffile as tf
@@ -18,6 +19,11 @@ try:
 except ImportError as e:
     print('can not import OpenCV. \n{}'.format(e))
 
+def load_protocol(fpath):
+    with open(fpath, 'r') as file:
+        data = json.load(file)
+
+    return data
 
 def saveFile(path, data):
     with open(path, 'wb') as f:

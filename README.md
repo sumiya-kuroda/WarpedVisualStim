@@ -34,19 +34,20 @@ We are planning on occasional updating this tool with no fixed schedule. Communi
 
 #### Language:
 
-1. python 3.8
+1. python 3.8.10
 
 
 #### Install:
+We use PyQt5 in addition to PsychoPy (PsychoPy does not require Qt library.) Install Qt.
+
 ```sh
 cd <package_path>
-conda env create -f environment.yml # use 3.8.10 for latest psychopy
+conda env create -f environment.yml # use 3.8.10 for psychopy==2023.1.0
 PYTHONIOENCODING=utf8 source activate base # (Windows Git bash)
 PYTHONIOENCODING=utf8 conda activate warpedvisualstim # (Windows cmd) https://stackoverflow.com/questions/59974715/conda-unicodeencodeerror-charmap-codec-cant-encode-character-u2580-in-po
 source activate warpedvisualstim # (Mac or Linux)
 python setup.py install
 pip install -e. # when developing codes
-# pip install psychopy==2023.1.0
 # pip install pytest
 ```
 
@@ -71,6 +72,7 @@ You need to gamma correct the monitors then. You can use PsychoPy's function for
 13. configobj
 14. sphinx, version 1.6.3 or later (just for documentation)
 15. numpydoc, version 0.7.0 (just for documentation)
+16. PyQt5
 
 for detailed installation instructions see the
 install page in documentation (`doc` branch).
