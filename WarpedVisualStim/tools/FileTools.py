@@ -8,6 +8,8 @@ import h5py
 import datetime
 from . import ImageAnalysis as ia
 import json
+from glob import glob
+import os
 
 try:
     import tifffile as tf
@@ -24,6 +26,15 @@ def load_protocol(fpath):
         data = json.load(file)
 
     return data
+
+def search_protcol(fpath = "./protocols"):
+    files = glob(fpath + '/*.json')
+    fnames = []
+    for file in files:
+        fname = os.path.basename(file).split(".")[0]
+        fnames.append(fname)
+
+    return fnames
 
 def saveFile(path, data):
     with open(path, 'wb') as f:

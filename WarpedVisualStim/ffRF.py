@@ -13,8 +13,7 @@ expInfo = {
     'Mouse ID': '',
     'Identifier': datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S"),
     'Protocol': search_protcol("./protocols"),
-    'Saving location': [str(expanduser("~")), 'D:/SuKu_RawData'],
-    'Plot map': True
+    'Saving location': [str(expanduser("~")), 'D:/SuKu_RawData']
 }
 dlg = gui.DlgFromDict(dictionary=expInfo, title='WarpedVisualStim MFH', screen=0, sortKeys=False) # show dialog and wait for OK or Cancel
 if dlg.OK == False:
@@ -28,11 +27,6 @@ mon = Monitor(resolution=task_protocol["mon_resolution"], dis=task_protocol["mon
               mon_height_cm=task_protocol["mon_height_cm"], C2T_cm=task_protocol["mon_height_cm"] /2, C2A_cm=task_protocol["mon_width_cm"] /2,
               center_coordinates=(0., 60.),
               downsample_rate=task_protocol["mon_downsample_rate"])
-if expInfo['Plot map']:
-    mon.plot_map()
-    plt.show()
-else:
-    pass
 # =================================================================================
 
 # ================ Initialize the indicator object ================================
@@ -40,31 +34,31 @@ ind = Indicator(mon, width_cm=task_protocol["ind_width_cm"], height_cm=task_prot
                 position=task_protocol["ind_position"], is_sync=True, freq=task_protocol["ind_freq"])
 # =================================================================================
 
-# ========================== KSstimAllDir =====================================
-ks = stim.KSstimAllDir(monitor=mon, indicator=ind, pregap_dur=task_protocol["pregap_dur"], postgap_dur=task_protocol["postgap_dur"],
-                       background=task_protocol["background"], coordinate=task_protocol["coordinate"], square_size=task_protocol["ks_square_size"],
-                       square_center=task_protocol["ks_square_center"], flicker_frame=task_protocol["ks_flicker_frame"],
-                       sweep_width=task_protocol["ks_sweep_width"], step_width=task_protocol["ks_step_width"], sweep_frame=task_protocol["ks_sweep_frame"],
-                       iteration=task_protocol["ks_iteration"])
+# ========================== DriftingGratingCircle =====================================
+dgc = stim.DriftingGratingCircle(monitor=mon, indicator=ind, background=task_protocol["background"],
+                                 coordinate=task_protocol["coordinate"], center=(10., 70.), sf_list=task_protocol["dgc_sf_list"],
+                                 tf_list=task_protocol["dgc_tf_list"], dire_list=task_protocol["dgc_direction_list"], con_list=task_protocol["dgc_contrast_list"], radius_list=(20.,),
+                                 block_dur=task_protocol["dgc_block_dur"], midgap_dur=task_protocol["dgc_midgap_dur"], is_smooth_edge=task_protocol["dgc_is_smooth_edge"], iteration=task_protocol["dgc_iteration"], pregap_dur=task_protocol["dgc_pregap_dur"],
+                                 postgap_dur=task_protocol["dgc_postgap_dur"], is_blank_block=True, is_random_start_phase=False)
+
 # =================================================================================
 
 # ================ Initialize the DisplaySequence object ==========================
-ds = DisplaySequence(log_dir=expInfo['Saving location'], backupdir=None,
-                     identifier=expInfo['Identifier'], display_iter=task_protocol["ds_display_iter"],
+ds = DisplaySequence(log_dir=expInfo['Saving location'], backupdir=None, identifier=expInfo['Identifier'], display_iter=task_protocol["ds_display_iter"],
                      mouse_id=expInfo['Mouse ID'], user_id=expInfo['User ID'],
-                     psychopy_mon=task_protocol["ds_stimulus_mon"], is_by_index=False,
-                     is_interpolate=task_protocol["ds_is_interpolate"], is_triggered=task_protocol["ds_is_triggered"],
+                     psychopy_mon=task_protocol["ds_stimulus_mon"],display_screen=task_protocol["ds_stimulus_screen"],
+                     is_by_index=True,is_interpolate=task_protocol["ds_is_interpolate"],is_triggered=task_protocol["ds_is_triggered"],
                      trigger_event=task_protocol["ds_trigger_event"], trigger_NI_dev=task_protocol["ds_trigger_NI_dev"],
                      trigger_NI_port=task_protocol["ds_trigger_NI_port"], trigger_NI_line=task_protocol["ds_trigger_NI_line"],
                      is_sync_pulse=task_protocol["ds_is_sync_pulse"], sync_pulse_NI_dev=task_protocol["ds_sync_pulse_NI_dev"],
                      sync_pulse_NI_port=task_protocol["ds_sync_pulse_NI_port"],
                      sync_pulse_NI_line=task_protocol["ds_sync_pulse_NI_line"],
-                     display_screen=task_protocol["ds_stimulus_screen"], is_save_sequence=task_protocol["ds_is_save_sequence"],
+                     is_save_sequence=task_protocol["ds_is_save_sequence"],
                      initial_background_color=task_protocol["ds_initial_background_color"],
                      color_weights=task_protocol["ds_color_weights"])
 # =================================================================================
 
 # =============================== display =========================================
-ds.set_stim(ks)
+ds.set_stim(dgc)
 ds.trigger_display()
 plt.show()
