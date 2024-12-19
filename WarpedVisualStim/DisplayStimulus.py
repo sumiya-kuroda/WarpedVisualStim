@@ -115,6 +115,9 @@ class DisplaySequence(object):
         psychopy_mon : str, optional
             label for monitor used for displaying the stimulus, defaults to
             'testMonitor'.
+        psychopy_nonused_mon : str, optional
+            label for monitor NOT used for displaying the stimulus, defaults to
+            'testMonitor'.
         is_interpolate : bool, optional
             defaults to `False`.
         is_triggered : bool, optional
@@ -149,6 +152,8 @@ class DisplaySequence(object):
             or "low_level". defaults to "negative_edge".
         display_screen : int
             determines which monitor to display stimulus on. defaults to `0`.
+        nonused_screen : int
+            for dual monitor setups, choose which monitor you are not using for stimulation
         initial_background_color : float
             defaults to `0`. should be in the range from -1. (black) to 1. (white)
         color_weights : tuple, optional
@@ -168,6 +173,7 @@ class DisplaySequence(object):
                  mouse_id='Test',
                  user_id='Name',
                  psychopy_mon='testMonitor',
+                 psychopy_nonused_mon='testMonitor',
                  is_by_index=True,
                  is_interpolate=False,
                  is_triggered=False,
@@ -181,6 +187,7 @@ class DisplaySequence(object):
                  sync_pulse_NI_port=1,
                  sync_pulse_NI_line=1,
                  display_screen=0,
+                 nonused_screen=None,
                  initial_background_color=0.,
                  color_weights=(1., 1., 1.)):
         """
@@ -191,6 +198,7 @@ class DisplaySequence(object):
         self.seq_log = {}
         self.identifier = str(identifier)
         self.psychopy_mon = psychopy_mon
+        self.psychopy_nonused_mon = psychopy_nonused_mon
         self.is_interpolate = is_interpolate
         self.is_triggered = is_triggered
         self.is_by_index = is_by_index
@@ -204,6 +212,7 @@ class DisplaySequence(object):
         self.sync_pulse_NI_port = sync_pulse_NI_port
         self.sync_pulse_NI_line = sync_pulse_NI_line
         self.display_screen = display_screen
+        self.nonused_screen = nonused_screen
 
         if len(color_weights) != 3:
             raise ValueError('input color_weights should be a tuple with 3 numbers, each from -1. to 1.')
@@ -388,8 +397,15 @@ class DisplaySequence(object):
                                fullscr=True,
                                screen=self.display_screen,
                                color=self.initial_background_color)
-
+        
         stim = visual.ImageStim(window, size=(2, 2), interpolate=self.is_interpolate)
+
+        if self.nonused_screen is not None:
+            window2 = visual.Window(size=resolution,
+                                     monitor=self.psychopy_nonused_mon,
+                                     fullscr=True,
+                                     screen=self.nonused_screen,
+                                     color=self.initial_background_color)
 
         # initialize keep_display
         self.keep_display = True
@@ -399,6 +415,8 @@ class DisplaySequence(object):
             display_wait = self._wait_for_trigger(event=self.trigger_event)
             if not display_wait:
                 window.close()
+                if self.nonused_screen is not None:
+                    window2.close()
                 self.clear()
                 return None
             else:
@@ -406,7 +424,9 @@ class DisplaySequence(object):
 
         # actual display
         self._display(window=window, stim=stim)
-
+        if self.nonused_screen is not None:
+            window2.close()
+            
         # analyze frames
         try:
             self.frame_duration, self.frame_stats = \
