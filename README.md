@@ -38,7 +38,7 @@ We are planning on occasional updating this tool with no fixed schedule. Communi
 
 
 #### Install:
-We use PyQt5 in addition to PsychoPy (PsychoPy does not require Qt library.) Install Qt.
+We use PyQt5 in addition to PsychoPy (PsychoPy does not require Qt library.) You can install Qt 5.15 from [here](https://doc.qt.io/qt-5/gettingstarted.html).
 
 ```sh
 cd <package_path>
@@ -52,9 +52,13 @@ pip install -e. # when developing codes
 ```
 
 #### Getting Started:
-You first need to let PsychoPy know which monitors you are using as visual stimulus monitors. Open PsychoPy GUI and navigate `Properties` > `Screen` > `Show Screen Numbers`. This will tell you the screen numbers for each monitor. Edit the Python file.
+You first need to let PsychoPy know which monitors you are using as visual stimulus monitors. Open PsychoPy GUI and navigate `Properties` > `Screen` > `Show Screen Numbers`. This will tell you the screen numbers for each monitor. Edit the protocol json files accordingly.
 
 You need to gamma correct the monitors then. You can use PsychoPy's function for gamma correction if you have one of their supported spectrophotometer. We use LS100. https://psychskills.wordpress.com/2017/04/20/monitor-calibration/ You also need to know that the performance is affected by blanking. Turn on ScanImage and start blanking. Then measure the luminance and Edit the Python file. TODO: Write a script that works with Thorlabs' photodetector.
+
+#### Running experiments
+- Mapping retinotopy: run `main.py`.
+- Mapping feed forwad receptive fields: run `ffRF.py`. We use drifting gratings to determine the ffRF.
 
 #### Dependencies:
 1. pytest
