@@ -35,20 +35,31 @@ We are planning on occasional updating this tool with no fixed schedule. Communi
 
 #### Language:
 
-1. python 3.7
+1. python 3.8.10
 
 
 #### Install:
-```
+We use PyQt5 in addition to PsychoPy (PsychoPy does not require Qt library.) You can install Qt 5.15 from [here](https://doc.qt.io/qt-5/gettingstarted.html).
+
+```sh
 cd <package_path>
-conda env create --name warpedvisualstim python=3.7
-activate warpedvisualstim (Windows)
-source activate warpedvisualstim (Mac or Linux)
+conda env create -f environment.yml # use 3.8.10 for psychopy==2023.1.0
+PYTHONIOENCODING=utf8 source activate base # (Windows Git bash)
+PYTHONIOENCODING=utf8 conda activate warpedvisualstim # (Windows cmd) https://stackoverflow.com/questions/59974715/conda-unicodeencodeerror-charmap-codec-cant-encode-character-u2580-in-po
+source activate warpedvisualstim # (Mac or Linux)
 python setup.py install
-pip install psychopy
-pip install pytest
+pip install -e. # when developing codes
+# pip install pytest
 ```
 
+#### Getting Started:
+You first need to let PsychoPy know which monitors you are using as visual stimulus monitors. Open PsychoPy GUI and navigate `Properties` > `Screen` > `Show Screen Numbers`. This will tell you the screen numbers for each monitor. Edit the protocol json files accordingly.
+
+You need to gamma correct the monitors then. You can use PsychoPy's function for gamma correction if you have one of their supported spectrophotometer. We use LS100. https://psychskills.wordpress.com/2017/04/20/monitor-calibration/ You also need to know that the performance is affected by blanking. Turn on ScanImage and start blanking. Then measure the luminance and Edit the Python file. TODO: Write a script that works with Thorlabs' photodetector.
+
+#### Running experiments
+- Mapping retinotopy: run `main.py`.
+- Mapping feed forwad receptive fields: run `ffRF.py`. We use drifting gratings to determine the ffRF.
 
 #### Dependencies:
 1. pytest
@@ -66,6 +77,7 @@ pip install pytest
 13. configobj
 14. sphinx, version 1.6.3 or later (just for documentation)
 15. numpydoc, version 0.7.0 (just for documentation)
+16. PyQt5
 
 for detailed installation instructions see the
 install page in documentation (`doc` branch).
@@ -74,3 +86,5 @@ install page in documentation (`doc` branch).
 
 1. Most image analysis parameters are defined as number of pixels, not microns.
 2. Works in windows, but not fully tested on Mac and Linux.
+3. You can delete conda env with `conda remove --name warpedvisualstim --all`.
+4. You can launch PsychoPy GUI by simply running `psychopy` but ***only when you use Windows cmd***. For whatever reason, it does not work with Git bash.

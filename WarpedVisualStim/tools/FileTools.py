@@ -7,9 +7,10 @@ import shutil
 import h5py
 import datetime
 from . import ImageAnalysis as ia
-import os
 import argparse
 from pathlib import Path
+import json
+from glob import glob
 
 try:
     import tifffile as tf
@@ -21,6 +22,20 @@ try:
 except ImportError as e:
     print('can not import OpenCV. \n{}'.format(e))
 
+def load_protocol(fpath):
+    with open(fpath, 'r') as file:
+        data = json.load(file)
+
+    return data
+
+def search_protcol(fpath = "./protocols"):
+    files = glob(fpath + '/*.json')
+    fnames = []
+    for file in files:
+        fname = os.path.basename(file).split(".")[0]
+        fnames.append(fname)
+
+    return fnames
 
 def saveFile(path, data):
     with open(path, 'wb') as f:
