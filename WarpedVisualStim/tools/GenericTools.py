@@ -46,3 +46,7 @@ def all_crossings(data, threshold=0):
     pos_up = data > threshold
     pos_down = data < threshold
     return ((~pos_up[:-1] & pos_up[1:]) | (~pos_down[:-1] & pos_down[1:])).nonzero()[0] + 1
+
+def make_nested_lst_of_tuples(nested_lst):
+    nested_lst_of_tuples = [tuple(l) for l in nested_lst]
+    return nested_lst_of_tuples

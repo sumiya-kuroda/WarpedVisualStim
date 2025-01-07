@@ -4492,6 +4492,9 @@ class DriftingGratingMultipleCircle(Stim):
     is_random_start_phase : bool
         if True, the starting phase of each block will be randomized
         if False, the starting phase of each block will be 0 degree
+    inverse : bool
+        if True, display gratings ouside a circular mask
+        if False, display gratings inside a circular mask
     """
 
     def __init__(self, monitor, indicator, background=0., coordinate='degree',
@@ -4499,7 +4502,7 @@ class DriftingGratingMultipleCircle(Stim):
                  con_list=(0.5,), radius_list=(10.,), block_dur=2., midgap_dur=0.5,
                  iteration=1, pregap_dur=2., postgap_dur=3., is_smooth_edge=False,
                  smooth_width_ratio=0.2, smooth_func=blur_cos, is_blank_block=True,
-                 is_random_start_phase=False):
+                 is_random_start_phase=False, inverse=False):
         """
         Initialize `DriftingGratingMultipleCircle` stimulus object, inherits Parameters
         from `Stim` class
@@ -4526,6 +4529,7 @@ class DriftingGratingMultipleCircle(Stim):
         self.smooth_width_ratio = smooth_width_ratio
         self.smooth_func = smooth_func
         self.is_random_start_phase = is_random_start_phase
+        self.inverse = inverse
 
         if int(block_dur * self.monitor.refresh_rate) >= 4:
             self.block_dur = float(block_dur)
@@ -4915,8 +4919,12 @@ class DriftingGratingMultipleCircle(Stim):
 
                 curr_circle_mask = mask_dict[(frame[6],) + frame[7]] # (radius, center)
 
-                mov[i] = ((curr_grating * curr_circle_mask) +
-                          (background_frame * (curr_circle_mask * -1. + 1.)))
+                if self.inverse:
+                    mov[i] = ((curr_grating * (curr_circle_mask * -1. + 1.)) +
+                            (background_frame * curr_circle_mask))
+                else:
+                    mov[i] = ((curr_grating * curr_circle_mask) +
+                            (background_frame * (curr_circle_mask * -1. + 1.)))
 
             # add sync square for photodiode
             mov[i, indicator_height_min:indicator_height_max,
@@ -5007,9 +5015,13 @@ class DriftingGratingMultipleCircle(Stim):
 
                 curr_circle_mask = mask_dict[(curr_frame[6],) + curr_frame[7]] # (radius, center)
 
-                mov[i] = ((curr_grating * curr_circle_mask) +
-                          (background_frame * (curr_circle_mask * -1. + 1.)))
-
+                if self.inverse:
+                    mov[i] = ((curr_grating * (curr_circle_mask * -1. + 1.)) +
+                            (background_frame * curr_circle_mask))
+                else:
+                    mov[i] = ((curr_grating * curr_circle_mask) +
+                            (background_frame * (curr_circle_mask * -1. + 1.)))
+                
             # add sync square for photodiode
             mov[i, indicator_height_min:indicator_height_max,
             indicator_width_min:indicator_width_max] = curr_frame[-1]

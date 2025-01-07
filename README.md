@@ -88,3 +88,4 @@ install page in documentation (`doc` branch).
 2. Works in windows, but not fully tested on Mac and Linux.
 3. You can delete conda env with `conda remove --name warpedvisualstim --all`.
 4. You can launch PsychoPy GUI by simply running `psychopy` but ***only when you use Windows cmd***. For whatever reason, it does not work with Git bash.
+5. It occasionally ends up with a weird bug with an error msg `ctypes.ArgumentError: argument 1: <class 'OverflowError'>: int too long to convert`. For now, just ignore the msg and restart the conda environemnt. This should fix the problem.
