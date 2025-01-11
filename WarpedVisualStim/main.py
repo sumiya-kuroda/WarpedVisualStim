@@ -62,10 +62,21 @@ ds = DisplaySequence(log_dir=expInfo['Saving location'], backupdir=None,
                      sync_pulse_NI_line=task_protocol["ds_sync_pulse_NI_line"],
                      display_screen=task_protocol["ds_stimulus_screen"], is_save_sequence=task_protocol["ds_is_save_sequence"],
                      initial_background_color=task_protocol["ds_initial_background_color"],
-                     color_weights=task_protocol["ds_color_weights"])
+                     color_weights=task_protocol["ds_color_weights"],
+                     use_daqlogger=task_protocol["ds_use_daqlogger"],daqlogger_ai_channels=task_protocol["ds_daqlogger_ai_channels"],
+                     daqlogger_ci_channels=task_protocol["ds_daqlogger_ci_channels"],
+                     daqlogger_sample_rate=task_protocol["ds_daqlogger_sample_rate"],
+                     daqlogger_sample_size=task_protocol["ds_daqlogger_sample_size"],
+                     daqlogger_osc_ip=task_protocol["ds_daqlogger_osc_ip"],
+                     daqlogger_osc_port=task_protocol["ds_daqlogger_osc_port"],
+                     daqlogger_osc_address_ai=task_protocol["ds_daqlogger_osc_address_ai"],
+                     daqlogger_osc_address_ci=task_protocol["ds_daqlogger_osc_address_ci"])
 # =================================================================================
 
 # =============================== display =========================================
 ds.set_stim(ks)
+input('Start Grab on ScanImage. Press return to continue when ready')
 ds.trigger_display()
+# csaved_file, _ = print(saved_file)
+# copy and paste './protocols/{}.json'.format(expInfo['Protocol'])
 plt.show()

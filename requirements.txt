@@ -16,3 +16,5 @@ pyglet==1.4.11
 # numpydoc
 # sphinx
 PyQt5==5.15.11
+nidaqmx==1.0.1 # for nidaq_DAQLogger.py
+python-osc==1.8.3 # for nidaq_DAQLogger.py
