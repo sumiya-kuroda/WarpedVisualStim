@@ -2,11 +2,11 @@ import matplotlib.pyplot as plt
 import WarpedVisualStim.StimulusRoutines as stim
 from WarpedVisualStim.MonitorSetup import Monitor, Indicator
 from WarpedVisualStim.DisplayStimulus import DisplaySequence
-from WarpedVisualStim.tools.FileTools import load_protocol, search_protcol
+from WarpedVisualStim.tools.FileTools import load_protocol, search_protcol, save_session_setting
 from WarpedVisualStim.tools.GenericTools import make_nested_lst_of_tuples
 from psychopy import gui, core
 from datetime import datetime, timezone
-from os.path import expanduser
+from os.path import expanduser, split
 
 # ================ Load protocol and Enter session information ==================================
 expInfo = {
@@ -59,10 +59,22 @@ ds = DisplaySequence(log_dir=expInfo['Saving location'], backupdir=None, identif
                      sync_pulse_NI_line=task_protocol["ds_sync_pulse_NI_line"],
                      is_save_sequence=task_protocol["ds_is_save_sequence"],
                      initial_background_color=task_protocol["ds_initial_background_color"],
-                     color_weights=task_protocol["ds_color_weights"])
+                     color_weights=task_protocol["ds_color_weights"],
+                     use_daqlogger=task_protocol["ds_use_daqlogger"], daqlogger_ai_channels=task_protocol["ds_daqlogger_ai_channels"],
+                     daqlogger_ci_channels=task_protocol["ds_daqlogger_ci_channels"],
+                     daqlogger_sample_rate=task_protocol["ds_daqlogger_sample_rate"],
+                     daqlogger_sample_size=task_protocol["ds_daqlogger_sample_size"],
+                     daqlogger_osc_ip=task_protocol["ds_daqlogger_osc_ip"],
+                     daqlogger_osc_port=task_protocol["ds_daqlogger_osc_port"],
+                     daqlogger_osc_address_ai=task_protocol["ds_daqlogger_osc_address_ai"],
+                     daqlogger_osc_address_ci=task_protocol["ds_daqlogger_osc_address_ci"])
 # =================================================================================
 
 # =============================== display =========================================
 ds.set_stim(dgc)
-ds.trigger_display()
+input('Start Grab on ScanImage. Press return to continue when ready')
+saved_file, _ = ds.trigger_display()
+save_session_setting(task_protocol, expInfo, 
+                     split(saved_file)[0], 
+                     split(saved_file)[1].split('.')[0] + '_settings.json')
 plt.show()

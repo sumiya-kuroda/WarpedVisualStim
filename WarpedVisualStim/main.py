@@ -2,10 +2,10 @@ import matplotlib.pyplot as plt
 import WarpedVisualStim.StimulusRoutines as stim
 from WarpedVisualStim.MonitorSetup import Monitor, Indicator
 from WarpedVisualStim.DisplayStimulus import DisplaySequence
-from WarpedVisualStim.tools.FileTools import load_protocol, search_protcol
+from WarpedVisualStim.tools.FileTools import load_protocol, search_protcol, save_session_setting
 from psychopy import gui, core
 from datetime import datetime, timezone
-from os.path import expanduser
+from os.path import expanduser, split
 
 # ================ Load protocol and Enter session information ==================================
 expInfo = {
@@ -63,7 +63,7 @@ ds = DisplaySequence(log_dir=expInfo['Saving location'], backupdir=None,
                      display_screen=task_protocol["ds_stimulus_screen"], is_save_sequence=task_protocol["ds_is_save_sequence"],
                      initial_background_color=task_protocol["ds_initial_background_color"],
                      color_weights=task_protocol["ds_color_weights"],
-                     use_daqlogger=task_protocol["ds_use_daqlogger"],daqlogger_ai_channels=task_protocol["ds_daqlogger_ai_channels"],
+                     use_daqlogger=task_protocol["ds_use_daqlogger"], daqlogger_ai_channels=task_protocol["ds_daqlogger_ai_channels"],
                      daqlogger_ci_channels=task_protocol["ds_daqlogger_ci_channels"],
                      daqlogger_sample_rate=task_protocol["ds_daqlogger_sample_rate"],
                      daqlogger_sample_size=task_protocol["ds_daqlogger_sample_size"],
@@ -76,7 +76,8 @@ ds = DisplaySequence(log_dir=expInfo['Saving location'], backupdir=None,
 # =============================== display =========================================
 ds.set_stim(ks)
 input('Start Grab on ScanImage. Press return to continue when ready')
-ds.trigger_display()
-# csaved_file, _ = print(saved_file)
-# copy and paste './protocols/{}.json'.format(expInfo['Protocol'])
+saved_file, _ = ds.trigger_display()
+save_session_setting(task_protocol, expInfo, 
+                     split(saved_file)[0], 
+                     split(saved_file)[1].split('.')[0] + '_settings.json')
 plt.show()

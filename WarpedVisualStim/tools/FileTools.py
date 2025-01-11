@@ -11,7 +11,7 @@ import argparse
 from pathlib import Path
 import json
 from glob import glob
-
+import shutil
 try:
     import tifffile as tf
 except ImportError:
@@ -28,13 +28,20 @@ def load_protocol(fpath):
 
     return data
 
+def copy_and_save(copied_file, destination, new_filename):
+    shutil.copy(copied_file, destination + '/' + new_filename)
+
+def save_session_setting(task_protocol, expInfo, destination, new_filename):
+    task_protocol.update(expInfo)
+    with open(destination + '/' + new_filename, 'w') as fp:
+        json.dump(task_protocol, fp)
+
 def search_protcol(fpath = "./protocols"):
     files = glob(fpath + '/*.json')
     fnames = []
     for file in files:
         fname = os.path.basename(file).split(".")[0]
         fnames.append(fname)
-
     return fnames
 
 def saveFile(path, data):
