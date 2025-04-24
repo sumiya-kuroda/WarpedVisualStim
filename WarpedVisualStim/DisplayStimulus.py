@@ -22,8 +22,6 @@ try:
 except Exception as e:
     print(e)
 
-from .tools.daqmx_recorder import DAQLogger
-
 def analyze_frames(ts_start, ts_end, refresh_rate, check_point=(0.02, 0.033, 0.05, 0.1)):
     """
     Analyze frame durations of time stamp data.
@@ -190,16 +188,7 @@ class DisplaySequence(object):
                  display_screen=0,
                  nonused_screen=None,
                  initial_background_color=0.,
-                 color_weights=(1., 1., 1.),
-                 use_daqlogger=False,
-                 daqlogger_ai_channels=[],
-                 daqlogger_ci_channels=[],
-                 daqlogger_sample_rate = 9000,
-                 daqlogger_sample_size = 1000,
-                 daqlogger_osc_ip = "127.0.0.1",
-                 daqlogger_osc_port = "8888",
-                 daqlogger_osc_address_ai = [],
-                 daqlogger_osc_address_ci = []
+                 color_weights=(1., 1., 1.)
                  ):
 
         """
@@ -256,25 +245,15 @@ class DisplaySequence(object):
         self.seq_log = None
 
         # set up log saving directory
-        self.directory = os.path.join(self.log_dir, 'visual_display_log')
-        if not (os.path.isdir(self.directory)):
-            os.makedirs(self.directory)
-            
-        """
-        DAQLogger argument
-        """
-        self.use_daqlogger = use_daqlogger
-        self.daqlogger = None
-        self.daqlogger_ai_channels= daqlogger_ai_channels
-        self.daqlogger_ci_channels= daqlogger_ci_channels
-        self.daqlogger_sample_rate = daqlogger_sample_rate
-        self.daqlogger_sample_size = daqlogger_sample_size
-        self.daqlogger_osc_ip = daqlogger_osc_ip
-        self.daqlogger_osc_port = daqlogger_osc_port
-        self.daqlogger_osc_address_ai = daqlogger_osc_address_ai 
-        self.daqlogger_osc_address_ci = daqlogger_osc_address_ci
+        self._directory = os.path.join(self.log_dir, 'visual_display_log')
+        if not (os.path.isdir(self._directory)):
+            os.makedirs(self._directory)
 
         self.clear()
+
+    @property
+    def directory(self):
+        return self._directory
 
     def set_any_array(self, any_array, log_dict=None):
         """
@@ -419,9 +398,7 @@ class DisplaySequence(object):
 
         # generate file name
         self._get_file_name()
-        if self.use_daqlogger:
-            print('Setting DAQLogger ...')
-            self._set_daqlogger()
+
         print('File name: {}.\n'.format(self.file_name))
 
         # -----------------setup psychopy window and stimulus--------------
@@ -456,17 +433,10 @@ class DisplaySequence(object):
             else:
                 time.sleep(5.)  # wait remote object to start
 
-        if self.use_daqlogger:
-            self.daqlogger.start_acquisition()
-
         # actual display
         self._display(window=window, stim=stim)
         if self.nonused_screen is not None:
             window2.close()
-
-        if self.use_daqlogger:
-            self.daqlogger.stop_acquisition()
-            self.daqlogger.close_tasks()
 
         # analyze frames
         try:
@@ -719,14 +689,12 @@ class DisplaySequence(object):
         displayLog = dict(self.__dict__)
         displayLog.pop('seq_log')
         displayLog.pop('sequence')
-        if self.use_daqlogger:
-            displayLog.pop('daqlogger')
         log_dict.update({'presentation': displayLog})
 
         file_name = self.file_name + ".pkl"
 
         # generate full log dictionary
-        path = os.path.join(self.directory, file_name)
+        path = os.path.join(self._directory, file_name)
         ft.saveFile(path, log_dict)
         # logger = ft.Logger(log_dict=log_dict, save_path=path)
         # logger.save_log()
@@ -734,7 +702,7 @@ class DisplaySequence(object):
         print("\nLog file generated successfully. Log file path: ")
         print('{}'.format(path))
         if self.is_save_sequence:
-            tf.imsave(os.path.join(self.directory, self.file_name + '.tif'),
+            tf.imsave(os.path.join(self._directory, self.file_name + '.tif'),
                       self.sequence.astype(np.float32))
             print('\nSequence file generated successfully. File path: ')
             print('{}'.format(os.path.join(self.directory, self.file_name + '.tif')))
@@ -776,20 +744,6 @@ class DisplaySequence(object):
         self.frame_stats = None
         self.file_name = None
         self.keep_display = None
-
-    def _set_daqlogger(self):
-
-        self.daqlogger = DAQLogger(dev_name=self.sync_pulse_NI_dev,
-                                   ai_channels=self.daqlogger_ai_channels,
-                                    ci_channels = self.daqlogger_ci_channels[0],
-                                    sample_rate = self.daqlogger_sample_rate ,
-                                    sample_size = self.daqlogger_sample_size, 
-                                    osc_ip = self.daqlogger_osc_ip,
-                                    osc_port = self.daqlogger_osc_port,
-                                    osc_address_ai = self.daqlogger_osc_address_ai,
-                                    osc_address_ci = self.daqlogger_osc_address_ci,
-                                    save_file_location_ai = os.path.join(self.directory, self.file_name + '_ai.bin'),
-                                    save_file_location_ci = os.path.join(self.directory, self.file_name + '_ci.bin'))
 
 
 if __name__ == "__main__":

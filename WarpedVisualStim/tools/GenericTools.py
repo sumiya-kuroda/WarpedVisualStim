@@ -1,5 +1,7 @@
 import numpy as np
-
+import queue
+from WarpedVisualStim.DisplayStimulus import DisplaySequence
+import os
 
 def weighted_average(values, weights):
     if values.shape != weights.shape:
@@ -50,3 +52,6 @@ def all_crossings(data, threshold=0):
 def make_nested_lst_of_tuples(nested_lst):
     nested_lst_of_tuples = [tuple(l) for l in nested_lst]
     return nested_lst_of_tuples
+
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')

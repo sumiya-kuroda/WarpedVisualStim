@@ -11,7 +11,6 @@ import argparse
 from pathlib import Path
 import json
 from glob import glob
-import shutil
 try:
     import tifffile as tf
 except ImportError:
@@ -21,6 +20,11 @@ try:
     import cv2
 except ImportError as e:
     print('can not import OpenCV. \n{}'.format(e))
+
+from os.path import expanduser
+import yaml
+from . import OperationError
+from pathlib import Path
 
 def load_protocol(fpath):
     with open(fpath, 'r') as file:
@@ -673,6 +677,21 @@ def get_abspath(relpath_from_this_file, pathlib=True):
         return Path(os.path.abspath(os.path.join(base, relpath_from_this_file)))
     else:
         return os.path.abspath(os.path.join(base, relpath_from_this_file))
+
+def dump_taskinfo(task_info_path):
+    copy_and_save(task_info_path, expanduser("~"), '.daqlogger_temp.yaml')
+
+def load_dumped_taskinfo():
+    fpath = Path(expanduser("~")) / '.daqlogger_temp.yaml'
+    try:
+        return load_protocol(fpath)
+    except FileNotFoundError as e:
+        raise OperationError('Have you prepared the stimuli? If not, do that first!')
+
+def clear_daqlogger_temp(dir, fname_stem):
+    shutil.move(Path(expanduser("~")) / '.daqlogger_temp_ai.bin', os.path.join(dir, fname_stem + '_ai.bin'))
+    shutil.move(Path(expanduser("~")) / '.daqlogger_temp_ci.bin', os.path.join(dir, fname_stem + '_ci.bin'))
+    os.remove(Path(expanduser("~")) / '.daqlogger_temp.yaml')
 
 if __name__ == '__main__':
     # ----------------------------------------------------------------------------
