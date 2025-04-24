@@ -52,25 +52,25 @@ if postprocess_settings['format'] == 'neuroblueprint':
         print('Converting nidaq recording')
         if len(session_settings["ds_daqlogger_ai_channels"]) >= 1:
             if postprocessInfo["Upload data to server?"]:
-                shutil.copy2(local_log_path + '/' + local_log_fname.rsplit('-', 1)[0] + '_ai.bin', str(server_behav_backup_location))
-            nidaq_ai = np.fromfile(local_log_path + '/' + local_log_fname.rsplit('-', 1)[0] + '_ai.bin', dtype=np.float64) # Needs to be float64!
+                shutil.copy2(local_log_path + '/' + local_log_fname + '_ai.bin', str(server_behav_backup_location))
+            nidaq_ai = np.fromfile(local_log_path + '/' + local_log_fname + '_ai.bin', dtype=np.float64) # Needs to be float64!
             nidaq_ai_data = nidaq_ai.reshape((len(session_settings["ds_daqlogger_ai_channels"]), -1))
             for i, aix in enumerate(session_settings["ds_daqlogger_ai_channels"]):
                 print(aix)
-                np.save(local_log_path + '/' + local_log_fname.rsplit('-', 1)[0] + '_' + aix + '.npy', nidaq_ai_data[i,:])
+                np.save(local_log_path + '/' + local_log_fname + '_' + aix + '.npy', nidaq_ai_data[i,:])
                 if postprocessInfo["Upload data to server?"]:
-                    np.save(str(server_behav_backup_location) + '/' + local_log_fname.rsplit('-', 1)[0] + '_' + aix + '.npy', nidaq_ai_data[i,:])
+                    np.save(str(server_behav_backup_location) + '/' + local_log_fname + '_' + aix + '.npy', nidaq_ai_data[i,:])
 
         if len(session_settings["ds_daqlogger_ci_channels"]) >= 1:
             if postprocessInfo["Upload data to server?"]:
-                shutil.copy2(local_log_path + '/' + local_log_fname.rsplit('-', 1)[0] + '_ci.bin', str(server_behav_backup_location))
-            nidaq_ci = np.fromfile(local_log_path + '/' + local_log_fname.rsplit('-', 1)[0] + '_ci.bin', dtype=np.float64) # Needs to be float64!
+                shutil.copy2(local_log_path + '/' + local_log_fname + '_ci.bin', str(server_behav_backup_location))
+            nidaq_ci = np.fromfile(local_log_path + '/' + local_log_fname + '_ci.bin', dtype=np.float64) # Needs to be float64!
             nidaq_ci_data = nidaq_ai.reshape((len(session_settings["ds_daqlogger_ci_channels"]), -1))
             for i, cix in enumerate(session_settings["ds_daqlogger_ci_channels"]):
                 print(cix)
-                np.save(local_log_path + '/' + local_log_fname.rsplit('-', 1)[0] + '_' + cix + '.npy', nidaq_ci_data[i,:])
+                np.save(local_log_path + '/' + local_log_fname + '_' + cix + '.npy', nidaq_ci_data[i,:])
                 if postprocessInfo["Upload data to server?"]:
-                    np.save(str(server_behav_backup_location) + '/' + local_log_fname.rsplit('-', 1)[0] + '_' + cix + '.npy', nidaq_ci_data[i,:])
+                    np.save(str(server_behav_backup_location) + '/' + local_log_fname + '_' + cix + '.npy', nidaq_ci_data[i,:])
         else:
             print('No nidaq recording found')
 
