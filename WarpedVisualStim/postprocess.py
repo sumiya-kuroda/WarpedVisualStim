@@ -1,7 +1,7 @@
 # This script postoricess data and upload it to ceph
 from pathlib import Path
 from psychopy import gui, core
-from WarpedVisualStim.tools.FileTools import load_protocol
+from WarpedVisualStim.tools.FileTools import load_protocol, saveFile
 from WarpedVisualStim.DisplayLogAnalysis import DisplayLogAnalyzer
 from os.path import expanduser, split
 import shutil
@@ -80,6 +80,8 @@ if postprocess_settings['format'] == 'neuroblueprint':
         stim_dict = dla.get_stim_dict()
         pd_onsets_seq = dla.analyze_photodiode_onsets_sequential(stim_dict, pd_thr=-0.5)
         pd_onsets_combined = dla.analyze_photodiode_onsets_combined(pd_onsets_seq)
-        # save pd_onsets_combined
+        saveFile(local_log_path + '/' + local_log_fname + '_pd_onsets_combined.pkl', pd_onsets_combined)
+        if postprocessInfo["Upload data to server?"]:
+            saveFile(str(server_behav_backup_location) + '/' + local_log_fname + '_pd_onsets_combined.pkl', pd_onsets_combined)
 
     print('Postprocess completed!')
