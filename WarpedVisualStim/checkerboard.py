@@ -16,7 +16,7 @@ expInfo = {
     'Identifier': datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S"),
     'Protocol': search_protcol("./protocols"),
     'Saving location': [str(expanduser("~")), 'D:/SuKu_RawData'],
-    'Inverse Gratings': False
+    'Plot map': True
 }
 dlg = gui.DlgFromDict(dictionary=expInfo, title='WarpedVisualStim MFH', screen=0, sortKeys=False) # show dialog and wait for OK or Cancel
 if dlg.OK == False:
@@ -30,6 +30,11 @@ mon = Monitor(resolution=task_protocol["mon_resolution"], dis=task_protocol["mon
               mon_height_cm=task_protocol["mon_height_cm"], C2T_cm=task_protocol["mon_height_cm"] /2, C2A_cm=task_protocol["mon_width_cm"] /2,
               center_coordinates=(0., 60.),
               downsample_rate=task_protocol["mon_downsample_rate"])
+if expInfo['Plot map']:
+    mon.plot_map()
+    plt.show()
+else:
+    pass
 # =================================================================================
 
 # ================ Initialize the indicator object ================================
@@ -37,13 +42,14 @@ ind = Indicator(mon, width_cm=task_protocol["ind_width_cm"], height_cm=task_prot
                 position=task_protocol["ind_position"], is_sync=True, freq=task_protocol["ind_freq"])
 # =================================================================================
 
-# ========================== DriftingGratingCircle =====================================
-dgc = stim.DriftingGratingMultipleCircle(monitor=mon, indicator=ind, background=task_protocol["background"],
-                                 coordinate=task_protocol["coordinate"], center_list=make_nested_lst_of_tuples(task_protocol["dgmc_center_list"]), sf_list=task_protocol["dgmc_sf_list"],
-                                 tf_list=task_protocol["dgmc_tf_list"], dire_list=task_protocol["dgmc_direction_list"], con_list=task_protocol["dgmc_contrast_list"], radius_list=task_protocol["dgmc_radius_list"],
-                                 block_dur=task_protocol["dgmc_block_dur"], midgap_dur=task_protocol["dgmc_midgap_dur"], is_smooth_edge=task_protocol["dgmc_is_smooth_edge"], iteration=task_protocol["dgmc_iteration"], pregap_dur=task_protocol["dgmc_pregap_dur"],
-                                 postgap_dur=task_protocol["dgmc_postgap_dur"], is_blank_block=task_protocol["dgmc_is_blank_block"], is_random_start_phase=task_protocol["dgmc_is_random_start_phase"],
-                                 inverse=expInfo['Inverse Gratings'])
+# ========================== LocallySparseNoise =====================================
+lsn = stim.LocallySparseNoise(monitor=mon, indicator=ind, pregap_dur=task_protocol["lsn_pregap_dur"],
+                              postgap_dur=task_protocol["lsn_postgap_dur"], coordinate=task_protocol["coordinate"],
+                              background=task_protocol["background"], subregion=None,
+                              grid_space=task_protocol["lsn_grid_space"], sign=task_protocol["lsn_sign"],
+                              probe_size=task_protocol["lsn_probe_size"], probe_orientation=task_protocol["lsn_probe_orientation"],
+                              probe_frame_num=task_protocol["lsn_probe_frame_num"], iteration=task_protocol["lsn_iteration"],
+                              is_include_edge=True, min_distance=task_protocol["lsn_min_distance"])
 
 # =================================================================================
 
@@ -64,7 +70,7 @@ ds = DisplaySequence(log_dir=expInfo['Saving location'], backupdir=None, identif
 # =================================================================================
 
 # =========================== display and daq logger ==============================
-ds.set_stim(dgc)
+ds.set_stim(lsn)
 if task_protocol["ds_use_daqlogger"]:
     dump_taskinfo('./protocols/{}.json'.format(expInfo['Protocol']))
     Prompt.ask('Run [bold magenta]python daqlogger.py[/bold magenta] to start recording NIDAQ. Press return to continue when ready')
