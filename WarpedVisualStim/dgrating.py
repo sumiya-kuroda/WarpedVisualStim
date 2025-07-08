@@ -16,6 +16,7 @@ expInfo = {
     'Identifier': datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S"),
     'Protocol': search_protcol("./protocols"),
     'Saving location': [str(expanduser("~")), 'D:/SuKu_RawData'],
+    'Plot map': True,
     'Inverse Gratings': False
 }
 dlg = gui.DlgFromDict(dictionary=expInfo, title='WarpedVisualStim MFH', screen=0, sortKeys=False) # show dialog and wait for OK or Cancel
@@ -30,6 +31,11 @@ mon = Monitor(resolution=task_protocol["mon_resolution"], dis=task_protocol["mon
               mon_height_cm=task_protocol["mon_height_cm"], C2T_cm=task_protocol["mon_height_cm"] /2, C2A_cm=task_protocol["mon_width_cm"] /2,
               center_coordinates=(0., 60.),
               downsample_rate=task_protocol["mon_downsample_rate"])
+if expInfo['Plot map']:
+    mon.plot_map()
+    plt.show()
+else:
+    pass
 # =================================================================================
 
 # ================ Initialize the indicator object ================================
