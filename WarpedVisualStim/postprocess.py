@@ -13,9 +13,9 @@ postprocess_settings = load_protocol('./protocols/postprocess_settings.json')
 
 if postprocess_settings['format'] == 'neuroblueprint':
     postprocessInfo = {
-        'Upload data to server?': False,
-        'Subject': 'SK001',
-        'Session': 'ses-01_date-20250111',
+        'Upload data to server?': True,
+        'SubjectID': 'SK001',
+        'SessionID': '1',
         'Datatype': ['behav', 'funcimg', 'ephys'],
         'Local data location': [str(expanduser("~")), 'D:/SuKu_RawData'],
     }
@@ -36,10 +36,15 @@ if postprocess_settings['format'] == 'neuroblueprint':
     local_log_path = split(filesToOpen[0])[0]
     local_log_fname = split(filesToOpen[0])[1].split('.')[0]
 
+    sub_dir_name = 'sub-' + postprocessInfo['SubjectID'] 
+    ses_date = local_log_fname.split('_')[0][-8:]
+    print(ses_date)
+    ses_dir_name = 'ses-' + postprocessInfo['SessionID'] + '_date-' + ses_date 
+
     if postprocessInfo["Upload data to server?"]:
-        server_behav_backup_location = Path(postprocess_settings['path_to_server']) / 'rawdata' / postprocessInfo['Subject'] / postprocessInfo['Session'] / postprocessInfo['Datatype']
+        server_behav_backup_location = Path(postprocess_settings['path_to_server']) / 'rawdata' / sub_dir_name / ses_dir_name / postprocessInfo['Datatype']
         server_behav_backup_location.mkdir(parents=True, exist_ok=True)
-        server_funcimg_backup_location = Path(postprocess_settings['path_to_server']) / 'rawdata' / postprocessInfo['Subject'] / postprocessInfo['Session'] / 'funcimg'
+        server_funcimg_backup_location = Path(postprocess_settings['path_to_server']) / 'rawdata' / sub_dir_name / ses_dir_name / 'funcimg'
         server_funcimg_backup_location.mkdir(parents=True, exist_ok=True)
 
         # Copy all logs to server
@@ -84,4 +89,7 @@ if postprocess_settings['format'] == 'neuroblueprint':
         if postprocessInfo["Upload data to server?"]:
             saveFile(str(server_behav_backup_location) + '/' + local_log_fname + '_pd_onsets_combined.pkl', pd_onsets_combined)
 
-    print('Postprocess completed!')
+else:
+    raise NotImplementedError
+
+print('Postprocess completed!')
