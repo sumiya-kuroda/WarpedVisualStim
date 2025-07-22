@@ -59,7 +59,7 @@ if postprocess_settings['format'] == 'neuroblueprint':
             if postprocessInfo["Upload data to server?"]:
                 shutil.copy2(local_log_path + '/' + local_log_fname + '_ai.bin', str(server_behav_backup_location))
             nidaq_ai = np.fromfile(local_log_path + '/' + local_log_fname + '_ai.bin', dtype=np.float64) # Needs to be float64!
-            nidaq_ai_data = nidaq_ai.reshape((len(session_settings["ds_daqlogger_ai_channels"]), -1))
+            nidaq_ai_data = nidaq_ai.reshape((-1, len(session_settings["ds_daqlogger_ai_channels"]))).T
             for i, aix in enumerate(session_settings["ds_daqlogger_ai_channels"]):
                 print(aix)
                 np.save(local_log_path + '/' + local_log_fname + '_' + aix + '.npy', nidaq_ai_data[i,:])
@@ -70,7 +70,7 @@ if postprocess_settings['format'] == 'neuroblueprint':
             if postprocessInfo["Upload data to server?"]:
                 shutil.copy2(local_log_path + '/' + local_log_fname + '_ci.bin', str(server_behav_backup_location))
             nidaq_ci = np.fromfile(local_log_path + '/' + local_log_fname + '_ci.bin', dtype=np.float64) # Needs to be float64!
-            nidaq_ci_data = nidaq_ai.reshape((len(session_settings["ds_daqlogger_ci_channels"]), -1))
+            nidaq_ci_data = nidaq_ci.reshape((-1, len(session_settings["ds_daqlogger_ci_channels"]))).T
             for i, cix in enumerate(session_settings["ds_daqlogger_ci_channels"]):
                 print(cix)
                 np.save(local_log_path + '/' + local_log_fname + '_' + cix + '.npy', nidaq_ci_data[i,:])
