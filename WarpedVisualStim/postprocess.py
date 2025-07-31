@@ -38,7 +38,6 @@ if postprocess_settings['format'] == 'neuroblueprint':
 
     sub_dir_name = 'sub-' + postprocessInfo['SubjectID'] 
     ses_date = local_log_fname.split('_')[0][-8:]
-    print(ses_date)
     ses_dir_name = 'ses-' + postprocessInfo['SessionID'] + '_date-' + ses_date 
 
     if postprocessInfo["Upload data to server?"]:

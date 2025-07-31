@@ -6,7 +6,7 @@ You choose what stimulus to show by selectively running
 ```sh
 python STIMULUS_TYPE.py
 ```
-and configure its pattern by editing the json file under `protocols/`.
+and configure its pattern by editing the json file under `protocols/`. Their filenames should start with the name of imaging modality you are using: e.g. `2p` or `wf`.
 
 As of July 2025, available stimuli are
 - `main.py`: RF mapping
@@ -47,3 +47,7 @@ Postprocess completed!
 ```
 
 Edit `protocols/postprocess_setting.json` for your environments.
+
+### How to analyze Photodiode recording
+- `main.py`'s photodiode becomes high during all stimulus presentation.
+- `checkerboard.py`'s photodiode becomes high at the onset of each square presentation, and becomes low afterwards.
