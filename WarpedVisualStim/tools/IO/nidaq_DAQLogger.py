@@ -43,8 +43,9 @@ class AnalogInput:
                                     samps_per_chan=sample_size,
                                     sample_mode=AcquisitionType.CONTINUOUS)
         
-        # Export the AI/SampleClock to PFI0 (default)
-        self.task.export_signals.export_signal(Signal.SAMPLE_CLOCK, clock_output)
+        if clock_output != '':
+            # Export the AI/SampleClock to PFI0 (default)
+            self.task.export_signals.export_signal(Signal.SAMPLE_CLOCK, clock_output)
 
         self.reader = AnalogMultiChannelReader(self.task.in_stream)
         self.task.in_stream.input_buf_size = sample_size * 10
