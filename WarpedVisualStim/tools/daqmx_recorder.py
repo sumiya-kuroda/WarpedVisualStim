@@ -26,7 +26,10 @@ class DAQLogger():
         self.sample_rate = sample_rate
         self.sample_size = sample_size
         self.source_clock_ai = '' # This uses /ai/SampleClock
-        self.source_clock_ci = '/{}/PFI0'.format(self.dev_name)
+        if self.ci_channels != '':
+            self.source_clock_ci = '/{}/PFI0'.format(self.dev_name)
+        else:
+            self.source_clock_ci = ''
 
         self.use_osc = use_osc
         self.osc_ip = osc_ip
