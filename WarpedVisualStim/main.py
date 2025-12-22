@@ -76,10 +76,10 @@ else:
 
 if "2p" in expInfo['Protocol']: 
     Prompt.ask('Start [bold magenta]Grab[/bold magenta] on ScanImage. Press return to continue when ready')
-if "wf" in expInfo['Protocol']: 
+elif "wf" in expInfo['Protocol']: 
     Prompt.ask('Press [bold magenta]Trial Trigger[/bold magenta] on WidefieldImager. Press return to continue when ready')
 else:
-    raise NotImplementedError
+    raise NotImplementedError('Check your protocol file')
 saved_file, _ = ds.trigger_display()
 
 input('please stop daqlogger now. Press return to continue when ready')
