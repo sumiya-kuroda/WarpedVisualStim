@@ -1,14 +1,25 @@
-# psychopy_movie_grid_restartable.py
 from psychopy import visual, core, event
+from rich.prompt import Prompt
+from WarpedVisualStim.tools.FileTools import get_abspath
 
 # -------------------------
 # SETTINGS
 # -------------------------
-MOVIE_PATH = r"C:\Users\data313\PPfb\WarpedVisualStim\WarpedVisualStim\tools\zebranoise\zebranoise.mp4"   # <-- set this
+
+setup = Prompt.ask("Which setup are you using", default="2p313")
+if '313' in setup:
+    print('You are using 2p313 setup')
+    setup = '2p313'
+else:
+    print('You are using wf370 setup')
+    setup = 'wf370'
+
+MOVIE_PATH = get_abspath('tools/zebranoise/zebranoise.mp4', pathlib=False)
+print(f'Playing video: {MOVIE_PATH}')
 BG_GRAY = [0.0, 0.0, 0.0]
 
 MOVIE_SIZE = (640, 368)  
-STEP_SEC = 1.0                # autoplay dwell per grid cell
+STEP_SEC = 1.0  
 
 # Keys:
 #   1-9   move movie
@@ -20,27 +31,44 @@ STEP_SEC = 1.0                # autoplay dwell per grid cell
 # -------------------------
 # WINDOW
 # -------------------------
-# win = visual.Window(fullscr=True, color=BG_GRAY, units="pix", allowGUI=False)
-win = visual.Window(size=[1080, 1920],
-                        monitor="testMonitor",
-                        fullscr=True,
-                        screen=2,
-                        color=BG_GRAY)
+if setup == '2p313':
+    win = visual.Window(size=[1080, 1920],
+                            monitor="testMonitor",
+                            fullscr=True,
+                            screen=2,
+                            color=BG_GRAY)
 
-win2 = visual.Window(size=[1080, 1920],
-                        monitor="testMonitor",
-                        fullscr=True,
-                        screen=0,
-                        color=BG_GRAY)
+    win2 = visual.Window(size=[1080, 1920],
+                            monitor="testMonitor",
+                            fullscr=True,
+                            screen=0,
+                            color=BG_GRAY)
+else:
+    win = visual.Window(size=[1920, 1200],
+                            monitor="testMonitor",
+                            fullscr=True,
+                            screen=1,
+                            color=BG_GRAY)
+    
 screen_w, screen_h = win.size
 
 # -------------------------
 # GRID POSITIONS (reading order: 1 top-left ... 9 bottom-right)
 # -------------------------
-margin_x = 0 # 0.10 * screen_w
-margin_y = 0 # 0.10 * screen_h
-xs = [-screen_w/2 + margin_x, 0, screen_w/2 - margin_x]
-ys = [ screen_h/2 - margin_y, 0, -screen_h/2 + margin_y]  # top, mid, bottom
+screen_w, screen_h = win.size
+movie_w = MOVIE_SIZE[0]
+movie_h = MOVIE_SIZE[1]
+
+# Maximum allowed center positions so the movie stays fully on screen
+x_edge = (screen_w - movie_w) / 2
+y_edge = (screen_h - movie_h) / 2
+
+# Clamp in case movie is >= screen size
+x_edge = max(0, x_edge)
+y_edge = max(0, y_edge)
+
+xs = [-x_edge, 0, x_edge]
+ys = [ y_edge, 0, -y_edge]   # top, middle, bottom
 
 pos_map = {
     "1": (xs[0], ys[0]), "2": (xs[1], ys[0]), "3": (xs[2], ys[0]),
@@ -59,7 +87,7 @@ def movie_finished(m):
 # MAKE MOVIE STIM
 # -------------------------
 def make_movie():
-    m = visual.MovieStim3(win, filename=MOVIE_PATH, loop=False, noAudio=False)
+    m = visual.MovieStim3(win, filename=MOVIE_PATH, loop=False, noAudio=True)
 
     # Size
     m.size = MOVIE_SIZE
