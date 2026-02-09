@@ -32,13 +32,13 @@ STEP_SEC = 1.0
 # WINDOW
 # -------------------------
 if setup == '2p313':
-    win = visual.Window(size=[1080, 1920],
+    win = visual.Window(size=[1920, 1080],
                             monitor="testMonitor",
                             fullscr=True,
                             screen=2,
                             color=BG_GRAY)
 
-    win2 = visual.Window(size=[1080, 1920],
+    win2 = visual.Window(size=[1920, 1080],
                             monitor="testMonitor",
                             fullscr=True,
                             screen=0,
@@ -89,7 +89,6 @@ def movie_finished(m):
 def make_movie():
     m = visual.MovieStim3(win, filename=MOVIE_PATH, loop=False, noAudio=True)
 
-    # Size
     m.size = MOVIE_SIZE
 
     return m
