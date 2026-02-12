@@ -20,3 +20,4 @@ nidaqmx==1.0.1 # for nidaq_DAQLogger.py
 python-osc==1.8.3 # for nidaq_DAQLogger.py
 pyfiglet
 rich
+psychopy-crs
