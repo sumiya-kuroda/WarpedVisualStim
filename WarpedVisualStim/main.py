@@ -27,7 +27,8 @@ task_protocol = load_protocol('./protocols/{}.json'.format(expInfo['Protocol']))
 # ================ Initialize the monitor object ==================================
 mon = Monitor(resolution=task_protocol["mon_resolution"], dis=task_protocol["mon_dis"], mon_width_cm=task_protocol["mon_width_cm"],
               mon_height_cm=task_protocol["mon_height_cm"], C2T_cm=task_protocol["mon_height_cm"] /2, C2A_cm=task_protocol["mon_width_cm"] /2,
-              center_coordinates=(0., 60.),
+              visual_field='left',
+              center_coordinates=(0., 45.),
               downsample_rate=task_protocol["mon_downsample_rate"])
 if expInfo['Plot map']:
     mon.plot_map()

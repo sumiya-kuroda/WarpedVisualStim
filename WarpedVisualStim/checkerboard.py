@@ -28,7 +28,8 @@ task_protocol = load_protocol('./protocols/{}.json'.format(expInfo['Protocol']))
 # ================ Initialize the monitor object ==================================
 mon = Monitor(resolution=task_protocol["mon_resolution"], dis=task_protocol["mon_dis"], mon_width_cm=task_protocol["mon_width_cm"],
               mon_height_cm=task_protocol["mon_height_cm"], C2T_cm=task_protocol["mon_height_cm"] /2, C2A_cm=task_protocol["mon_width_cm"] /2,
-              center_coordinates=(0., 60.),
+              visual_field='left',
+              center_coordinates=(0., 45.),
               downsample_rate=task_protocol["mon_downsample_rate"])
 if expInfo['Plot map']:
     mon.plot_map()
@@ -82,7 +83,10 @@ saved_file, _ = ds.trigger_display()
 
 input('please stop daqlogger now. Press return to continue when ready')
 if task_protocol["ds_use_daqlogger"]:
-    clear_daqlogger_temp(ds.directory, split(saved_file)[1].split('.')[0])
+    if not 'test' in expInfo['Mouse ID']:
+        clear_daqlogger_temp(ds.directory, split(saved_file)[1].split('.')[0])
+    else:
+        print('Due to test session, DAQ Logger was not used')
 save_session_setting(task_protocol, expInfo, 
                      split(saved_file)[0], 
                      split(saved_file)[1].split('.')[0] + '_settings.json')
