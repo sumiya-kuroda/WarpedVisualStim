@@ -2,6 +2,7 @@ from allensdk.core.brain_observatory_cache import BrainObservatoryCache
 import tifffile
 from pathlib import Path
 import numpy as np
+from skimage.transform import resize
 
 # ------------------------------------------------
 # Download natural scenes stimulus
@@ -31,3 +32,28 @@ tifffile.imwrite(
 )
 
 print("Saved: natural_scenes_allen.tiff")
+
+print('Downsampling with factor 5...')
+
+target_h = 1080 // 5  # 216
+target_w = 1920 // 5  # 384
+
+downsampled = resize(
+    scenes.astype(np.float32),
+    (scenes.shape[0], target_h, target_w),
+    order=3,                # bicubic interpolation
+    anti_aliasing=True,
+    preserve_range=True
+)
+
+print("Downsampled shape:", downsampled.shape)
+# (118, 216, 384)
+
+# ------------------------------------------------
+# Save as single TIFF stack
+# ------------------------------------------------
+
+tifffile.imwrite(
+    "natural_scenes_allen_downsampled.tiff",
+    downsampled.astype(np.float32)
+)
