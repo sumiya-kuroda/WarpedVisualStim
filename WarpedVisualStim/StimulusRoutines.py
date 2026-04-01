@@ -3176,7 +3176,7 @@ class StaticImages(Stim):
         index of this image will be -1.
     """
 
-    def __init__(self, monitor, indicator, background=0., coordinate='degree',
+    def __init__(self, monitor, indicator, background=0., path_images='', coordinate='degree',
                  img_center=(0., 60.), deg_per_pixel=(0.1, 0.1), display_dur=0.25,
                  midgap_dur=0., iteration=1, pregap_dur=2., postgap_dur=3., is_blank_block=True):
         """
@@ -3200,6 +3200,7 @@ class StaticImages(Stim):
         except TypeError:
             self.deg_per_pixel_alt = self.deg_per_pixel_azi = float(deg_per_pixel)
 
+        self.path_images = str(path_images)
         self.display_dur = float(display_dur)
         self.midgap_dur = float(midgap_dur)
         self.iteration = int(iteration)
@@ -3213,7 +3214,7 @@ class StaticImages(Stim):
     def midgap_frame_num(self):
         return int(self.midgap_dur * self.monitor.refresh_rate)
 
-    def wrap_images(self, work_dir):
+    def wrap_images(self):
         """
         look for the 'images_original.tif' in the work_dir, load the images,
         warp and luminance correct images, save wrapping results in an HDF5 file
@@ -3253,19 +3254,15 @@ class StaticImages(Stim):
                 same shape as each frame in images_dewrapped
         """
 
-        if os.path.isfile(os.path.join(work_dir, 'wrapped_images_for_display.hdf5')):
-            raise IOError('"wrapped_images_for_display.hdf5" already exists in the '
-                          '"work_dir" : {}. Please choose another folder or delete '
-                          'the file.'.format(os.path.realpath(work_dir)))
-
-        imgs = tf.imread(os.path.join(work_dir, 'images_original.tif'))
+        imgs = tf.imread(self.path_images)
+        saving_file_location = os.path.splitext(self.path_images)[0] + '.h5'
 
         deg_per_pixel = [self.deg_per_pixel_alt, self.deg_per_pixel_azi]
         wrapping_results = self.monitor.warp_images(imgs=imgs, center_coor=self.img_center,
                                                     deg_per_pixel=deg_per_pixel,
                                                     is_luminance_correction=True)
         imgs_w, alt_w, azi_w, imgs_dw, alt_dw, azi_dw = wrapping_results
-        results_f = h5py.File(os.path.join(work_dir, 'wrapped_images_for_display.hdf5'), 'a')
+        results_f = h5py.File(saving_file_location, 'a')
         grp_w = results_f.create_group('images_wrapped')
         _ = grp_w.create_dataset('images', data=imgs_w)
         _ = grp_w.create_dataset('altitude', data=alt_w)
@@ -3327,12 +3324,12 @@ class StaticImages(Stim):
                              'downsampled monitor.')
 
         try:
-            alt_w = img_f['images_wrapped/altitude'].value
+            alt_w = img_f['images_wrapped/altitude'][()]
         except:
             alt_w = None
 
         try:
-            azi_w = img_f['images_wrapped/azimuth'].value
+            azi_w = img_f['images_wrapped/azimuth'][()]
         except:
             azi_w = None
 
@@ -3345,7 +3342,7 @@ class StaticImages(Stim):
                 raise ValueError('the azimuth coordinates of input wrapped images do not '
                                  'match the wrapped monitor pixel azimuth coordinates.')
 
-        self.images_wrapped = img_f['images_wrapped/images'].value
+        self.images_wrapped = img_f['images_wrapped/images'][()]
 
         if 'images_dewrapped' in img_f:
             if not img_f['images_dewrapped/images'].shape != 3:
@@ -3362,9 +3359,9 @@ class StaticImages(Stim):
                 self.altitude_dewrapped = None
                 self.azimuth_dewrapped = None
             else:
-                self.images_dewrapped = img_f['images_dewrapped/images'].value
+                self.images_dewrapped = img_f['images_dewrapped/images'][()]
                 try:
-                    alt_d = img_f['images_dewrapped/altitude'].value
+                    alt_d = img_f['images_dewrapped/altitude'][()]
                     if alt_d.shape[0] != self.images_dewrapped.shape[1] or \
                                     alt_d.shape[1] != self.images_dewrapped.shape[2]:
                         print ('altitude coordinates of images_dewrapped in the input file have '
@@ -3377,7 +3374,7 @@ class StaticImages(Stim):
                     self.altitude_dewrapped = None
 
                 try:
-                    azi_d = img_f['images_dewrapped/azimuth'].value
+                    azi_d = img_f['images_dewrapped/azimuth'][()]
                     if azi_d.shape[0] != self.images_dewrapped.shape[1] or \
                                     azi_d.shape[1] != self.images_dewrapped.shape[2]:
                         print ('azimuth coordinates of images_dewrapped in the input file have '

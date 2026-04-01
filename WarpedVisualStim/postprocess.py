@@ -88,6 +88,13 @@ if postprocess_settings['format'] == 'neuroblueprint':
         if postprocessInfo["Upload data to server?"]:
             saveFile(str(server_behav_backup_location) + '/' + local_log_fname + '_pd_onsets_combined.pkl', pd_onsets_combined)
 
+    if 'StaticImages' in local_log_fname:
+        if postprocessInfo["Upload data to server?"]:
+            path_to_images = Path('./tools/naturalscene').glob('*.h5')
+            for image in path_to_images:
+                shutil.copy2(str(image), str(server_behav_backup_location))
+            print('Copied all the natural image HDF5 files')
+
 else:
     raise NotImplementedError
 
