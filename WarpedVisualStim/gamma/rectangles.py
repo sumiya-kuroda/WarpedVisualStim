@@ -6,7 +6,8 @@ def show_three_rectangles():
     win = visual.Window(
         size=[800, 600],
         color=[0, 0, 0],   # background (black)
-        units="pix"
+        units="pix",
+        screen=2,
     )
 
     # Rectangle settings

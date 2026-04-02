@@ -1,6 +1,7 @@
 import os
 from os.path import expanduser
 from WarpedVisualStim.tools.daqmx_recorder import DAQLogger
+from WarpedVisualStim.tools.createttl import TTLGenerator
 from WarpedVisualStim.tools.FileTools import load_dumped_taskinfo
 from WarpedVisualStim.tools.GenericTools import clear_screen
 from WarpedVisualStim.tools import OperationError
@@ -27,12 +28,17 @@ if task_protocol["ds_use_daqlogger"]:
 else:
     raise OperationError('Task protocol says no daqlogger is needed')
 
+if task_protocol["ds_use_camera_pulse"]:
+    camerattl = TTLGenerator(task_protocol["ds_camera_pulse_NI_dev"], task_protocol["ds_camera_pulse_NI_port"], task_protocol["ds_camera_pulse_NI_line"])
+
 daqlogger.start_acquisition()
+camerattl.runTTLCycle(frequency=task_protocol["ds_camera_pulse_freq"])
 print(pyfiglet.figlet_format('Recording NIDAQ!',font='doom'))
 
 input('Press return to stop the recording')
 
 clear_screen()
+camerattl.close()
 daqlogger.stop_acquisition()
 daqlogger.close_tasks()
 print('daqlogger has shut down!')
