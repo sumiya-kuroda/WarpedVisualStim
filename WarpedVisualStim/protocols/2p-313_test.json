@@ -1,41 +1,146 @@
 {
-    "dialog_screen": 0,
-    "mon_resolution": [1080, 1920],
-    "mon_width_cm":52,
-    "mon_height_cm": 32,
-    "mon_refresh_rate": 60,
-    "mon_dis": 15,
-    "mon_downsample_rate": 5,
-    "ind_width_cm": 3,
-    "ind_height_cm": 3,
-    "ind_position": "southeast",
-    "ind_freq": 1,
-    "ds_stimulus_mon": "testMonitor",
-    "ds_is_by_index": false,
-    "ds_is_interpolate": false,
-    "ds_is_triggered": false,
-    "ds_is_save_sequence": false,
-    "ds_trigger_event": "negative_edge",
-    "ds_trigger_NI_dev": "Dev1",
-    "ds_trigger_NI_port": 1,
-    "ds_trigger_NI_line": 0,
-    "ds_is_sync_pulse": true,
-    "ds_sync_pulse_NI_dev": "Dev1",
-    "ds_sync_pulse_NI_port": 1,
-    "ds_sync_pulse_NI_line": 1,
-    "ds_stimulus_screen": 1,
-    "ds_initial_background_color": 0,
-    "ds_color_weights": [1,1,1],
-    "ds_display_iter": 1,
-    "pregap_dur": 2,
-    "postgap_dur": 3,
-    "background": 0,
-    "coordinate": "degree",
-    "ks_square_size": 25,
-    "ks_square_center": [0,0],
-    "ks_flicker_frame": 10,
-    "ks_sweep_width": 20,
-    "ks_step_width": 0.15,
-    "ks_sweep_frame": 1,
-    "ks_iteration": 1
+  "mon_resolution": [
+    1080,
+    1920
+  ],
+  "mon_width_cm": 47.6,
+  "mon_height_cm": 26.8,
+  "mon_refresh_rate": 60,
+  "mon_dis": 15,
+  "mon_downsample_rate": 5,
+  "ind_width_cm": 4,
+  "ind_height_cm": 5,
+  "ind_position": "southwest",
+  "ind_freq": 1,
+  "ds_stimulus_mon": "testMonitor",
+  "ds_nonused_mon": "testMonitor",
+  "ds_is_interpolate": false,
+  "ds_is_triggered": false,
+  "ds_is_save_sequence": false,
+  "ds_trigger_event": "negative_edge",
+  "ds_trigger_NI_dev": "Dev2",
+  "ds_trigger_NI_port": 1,
+  "ds_trigger_NI_line": 0,
+  "ds_is_sync_pulse": true,
+  "ds_sync_pulse_NI_dev": "Dev2",
+  "ds_sync_pulse_NI_port": 1,
+  "ds_sync_pulse_NI_line": 5,
+  "ds_stimulus_screen": 2,
+  "ds_nonused_screen": 1,
+  "ds_initial_background_color": 0,
+  "ds_color_weights": [
+    1,
+    1,
+    1
+  ],
+  "ds_display_iter": 1,
+  "pregap_dur": 2,
+  "postgap_dur": 3,
+  "background": 0,
+  "coordinate": "degree",
+  "ks_square_size": 25,
+  "ks_square_center": [
+    0,
+    0
+  ],
+  "ks_flicker_frame": 10,
+  "ks_sweep_width": 20,
+  "ks_step_width": 0.15,
+  "ks_sweep_frame": 1,
+  "ks_iteration": 1,
+  "dgmc_center_list": [
+    [
+      0,
+      45
+    ]
+  ],
+  "dgmc_sf_list": [
+    0.04,
+    0.08
+  ],
+  "dgmc_tf_list": [
+    2,
+    4
+  ],
+  "dgmc_radius_list": [
+    60
+  ],
+  "dgmc_direction_list": [
+    0,
+    45,
+    90,
+    135,
+    180,
+    225,
+    270,
+    315
+  ],
+  "dgmc_contrast_list": [
+    1
+  ],
+  "dgmc_block_dur": 2,
+  "dgmc_midgap_dur": 3,
+  "dgmc_pregap_dur": 3,
+  "dgmc_postgap_dur": 3,
+  "dgmc_is_smooth_edge": true,
+  "dgmc_iteration": 10,
+  "dgmc_is_blank_block": true,
+  "dgmc_is_random_start_phase": false,
+  "lsn_pregap_dur": 3,
+  "lsn_postgap_dur": 3,
+  "lsn_min_distance": 20,
+  "lsn_grid_space": [
+    8,
+    8
+  ],
+  "lsn_probe_size": [
+    8,
+    8
+  ],
+  "lsn_probe_orientation": 0,
+  "lsn_probe_frame_num": 30,
+  "lsn_sign": "ON-OFF",
+  "lsn_iteration": 100,
+  "si_img_center": [
+    0,
+    45
+  ],
+  "si_deg_per_pixel": [
+    0.5,
+    0.5
+  ],
+  "si_display_dur": 0.75,
+  "si_midgap_dur": 0.75,
+  "si_iteration": 2,
+  "si_pregap_dur": 2,
+  "si_postgap_dur": 3,
+  "ds_use_daqlogger": true,
+  "ds_daqlogger_ai_channels": [
+    "ai0",
+    "ai3",
+    "ai4",
+    "ai13"
+  ],
+  "ds_daqlogger_ci_channels": [
+    "ctr0"
+  ],
+  "ds_daqlogger_sample_rate": 5000,
+  "ds_daqlogger_sample_size": 1000,
+  "ds_daqlogger_osc_ip": "127.0.0.1",
+  "ds_daqlogger_osc_port": "12345",
+  "ds_daqlogger_osc_address_ai": [
+    "/ai0",
+    "/ai3",
+    "/ai4",
+    "/ai13"
+  ],
+  "ds_daqlogger_osc_address_ci": [
+    "/ctr0"
+  ],
+  "ds_use_camera_pulse": true,
+  "ds_camera_pulse_NI_dev": "Dev2",
+  "ds_camera_pulse_NI_port": 2,
+  "ds_camera_pulse_NI_line": 5,
+  "ds_camera_pulse_freq": 60
 }
+
