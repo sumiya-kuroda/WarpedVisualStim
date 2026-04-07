@@ -2,7 +2,8 @@ import os
 import numpy as np
 from pathlib import Path
 from typing import Literal
-
+import json
+import pickle 
 
 def _parse_binary_fname(fname, lastidx=None, dtype='uint16', shape=None, sep='_'):
     """Extract dtype and (NCHANNELS, H, W) shape from a wfield-convention filename.
@@ -191,3 +192,32 @@ def find_wf_data(ses_raw_path):
     if not frames_files:
         raise FileNotFoundError(f"No Frames_*.dat files found in {ses_raw_path}")
     return frames_files[0]
+
+def find_warpedvisualstim_config(ses_raw_path: Path):
+    folder = ses_raw_path / 'behav'
+    matches = list(folder.glob('*_settings.json'))
+    if not matches:
+        raise FileNotFoundError(f"No *_settings.json found in {folder}")
+    if len(matches) > 1:
+        raise ValueError(f"Multiple *_settings.json found: {matches}")
+    with open(matches[0], 'r') as f:
+        return json.load(f)
+    
+def find_warpedvisualstim_data(ses_raw_path: Path):
+    folder = ses_raw_path / 'behav'
+    matches = list(folder.glob('*complete.pkl'))
+    if not matches:
+        raise FileNotFoundError(f"No *complete.pkl found in {folder}")
+    if len(matches) > 1:
+        raise ValueError(f"Multiple *complete.pkl found: {matches}")
+    with open(matches[0], 'rb') as f:
+        return pickle.load(f)
+    
+def find_photodiode_data(ses_raw_path: Path, channel: str='ai2'):
+    folder = ses_raw_path / 'behav'
+    matches = list(folder.glob(f'*{channel}.npy'))
+    if not matches:
+        raise FileNotFoundError(f"No *{channel}.npy found in {folder}")
+    if len(matches) > 1:
+        raise ValueError(f"Multiple *{channel}.npy found: {matches}")
+    return np.load(matches[0])

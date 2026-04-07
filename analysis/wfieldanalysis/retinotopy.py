@@ -23,7 +23,7 @@ import matplotlib.colors as mcolors
 # FFT utilities
 # ---------------------------------------------------------------------------
 
-def fft_movie(movie, component=1, output_raw=False):
+def fft_movie(movie, component=1, output_raw=False, axis=0):
     """Compute the FFT of a movie along the time axis.
 
     Parameters
@@ -48,7 +48,7 @@ def fft_movie(movie, component=1, output_raw=False):
     movief : ndarray, shape (H, W), complex
         Raw complex FFT at component.
     """
-    movief = _fft(movie, axis=0)
+    movief = _fft(movie, axis=axis)
     if output_raw:
         return movief[component]
     phase = -1.0 * np.angle(movief[component]) % (2 * np.pi)
