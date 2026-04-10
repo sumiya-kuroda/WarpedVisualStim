@@ -1,0 +1,61 @@
+[project]
+name = "retinotopy"
+authors = [{name = "Sumiya Kuroda", email= "skurodao@ucl.ac.uk"}]
+description = "WarpedVisualStim WF analysis"
+requires-python = ">=3.8,<3.13"
+version = "0.1.0"
+license = {text = "BSD-3-Clause"}
+
+# common core dependency
+dependencies = [
+  "numpy",
+  "numpyimage",
+  "scikit-learn",
+  "ipykernel"
+]
+
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: BSD License",
+]
+
+[build-system]
+requires = [
+    "setuptools>=45",
+    "wheel",
+    "setuptools_scm[toml]>=6.2",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["wfieldanalysis*"]
+
+[tool.ruff]
+line-length = 79
+exclude = ["__init__.py", "build", ".eggs"]
+lint.select = [
+  "E",   # pycodestyle errors
+  "F",   # Pyflakes
+  "I",   # isort
+  # You can see what all the rules do here: https://docs.astral.sh/ruff/rules/
+  # Some additional ruff rules that might be useful (uncomment to enable)
+  #"UP",  # pyupgrade
+  #"B",   # flake8 bugbear
+  #"SIM", # flake8 simplify
+  #"C90", # McCabe complexity
+]
+fix = true
+
+[tool.ruff.format]
+docstring-code-format = true # Also format code in docstrings (e.g. examples)
+
+[tool.codespell]
+skip = '.git'
+check-hidden = true
