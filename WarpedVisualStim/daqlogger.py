@@ -32,13 +32,15 @@ if task_protocol["ds_use_camera_pulse"]:
     camerattl = TTLGenerator(task_protocol["ds_camera_pulse_NI_dev"], task_protocol["ds_camera_pulse_NI_port"], task_protocol["ds_camera_pulse_NI_line"])
 
 daqlogger.start_acquisition()
-camerattl.runTTLCycle(frequency=task_protocol["ds_camera_pulse_freq"])
+if task_protocol["ds_use_camera_pulse"]:
+    camerattl.runTTLCycle(frequency=task_protocol["ds_camera_pulse_freq"])
 print(pyfiglet.figlet_format('Recording NIDAQ!',font='doom'))
 
 input('Press return to stop the recording')
 
 clear_screen()
-camerattl.close()
+if task_protocol["ds_use_camera_pulse"]:
+    camerattl.close()
 daqlogger.stop_acquisition()
 daqlogger.close_tasks()
 print('daqlogger has shut down!')

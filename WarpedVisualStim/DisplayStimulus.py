@@ -408,6 +408,7 @@ class DisplaySequence(object):
         window = visual.Window(size=resolution,
                                monitor=self.psychopy_mon,
                                gammaErrorPolicy="ignore",
+                               fullscr=True,
                                gamma=1.0,
                                screen=self.display_screen,
                                color=self.initial_background_color)
