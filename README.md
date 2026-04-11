@@ -58,8 +58,17 @@ You first need to let PsychoPy know which monitors you are using as visual stimu
 You need to gamma correct the monitors then. You can use PsychoPy's function for gamma correction if you have one of their supported spectrophotometer. We use LS100. https://psychskills.wordpress.com/2017/04/20/monitor-calibration/ You also need to know that the performance is affected by blanking. Turn on ScanImage and start blanking. Then measure the luminance and Edit the Python file. TODO: Write a script that works with Thorlabs' photodetector.
 
 #### Running experiments
-- Mapping retinotopy: run `main.py`.
-- Mapping feed forwad receptive fields: run `ffRF.py`. We use drifting gratings to determine the ffRF.
+- Mapping retinotopy (coarse): run `main.py`.
+- Mapping retinotopy (fine): run `checkerboard.py`.
+- Mapping feed forwad receptive fields: run `dgrating.py`. We use drifting gratings to determine the ffRF.
+
+#### Gamma correction
+While PsychoPy supports gamma correction, there is a bug with Windows 10 at the moment, which you cannot use dual or triple monitor setup (unless you duplicate one monitor). Hence we use alternative approach to hijack OpenGL process.
+
+1. Disconnect all the other monitors, and plug ColorCAL3 into USB. Launch Monitor Center and start Gamma calibration.
+2. Check the gamma values and plot it. Remove old table.
+3. Reconnect all the other monitors.
+4. Use gamma/rectangles.py to measure the luminance level.
 
 #### Dependencies:
 1. pytest

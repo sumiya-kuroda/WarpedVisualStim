@@ -52,7 +52,7 @@ class Monitor(object):
     gamma_grid : optional
          for gamme correction, defaults to `None`
     luminance : optional
-         monitor luminance, defaults to `None`
+         monitor luminance, defaults to `None` target range (0., 20.) cd/m2 — you set this
     downsample_rate : int, optional
          downsample rate of monitor pixels, defaults to 10
     refresh_rate : float, optional
@@ -73,7 +73,7 @@ class Monitor(object):
                  name='testMonitor',
                  gamma=None,
                  gamma_grid=None,
-                 luminance=None,
+                 luminance=(0,20),
                  downsample_rate=10,
                  refresh_rate=60.):
         """
@@ -110,7 +110,8 @@ class Monitor(object):
         self.gamma = gamma
         self.gamma_grid = gamma_grid
         self.luminance = luminance
-        self.refresh_rate = 60
+        self.luminance_range = None       # physical monitor range — set via calibration
+        self.refresh_rate =refresh_rate
 
         # distance form projection point of the eye to bottom of the monitor
         self.C2B_cm = self.mon_height_cm - self.C2T_cm
@@ -136,6 +137,7 @@ class Monitor(object):
         self.lin_coord_x = old_map_x
         self.lin_coord_y = old_map_y
 
+        self.set_luminance_from_psychopy(self.name)  # reads physical range from calibration
         self.remap()
 
     def set_gamma(self, gamma, gamma_grid):
@@ -437,7 +439,22 @@ class Monitor(object):
                 curr_mean = np.nanmean(curr_frame.flat)
                 curr_frame = curr_frame - curr_mean
                 curr_amp = np.max([np.nanmax(curr_frame.flat), abs(np.nanmin(curr_frame.flat))])
-                curr_frame = curr_frame / curr_amp
+                curr_frame = curr_frame / curr_amp  # now in [-1, 1]
+
+                if self.luminance is not None and self.luminance_range is not None:
+                    lum_target_min, lum_target_max = self.luminance       # your target
+                    lum_min, lum_max = self.luminance_range               # physical range
+                    # step 1: [-1,1] -> [0,1]
+                    curr_frame_01 = (curr_frame + 1.) / 2.
+                    # step 2: [0,1] -> target cd/m2
+                    curr_frame_lum = curr_frame_01 * (lum_target_max - lum_target_min) + lum_target_min
+                    # step 3: target cd/m2 -> [0,1] normalized by monitor range
+                    curr_frame_01 = (curr_frame_lum - lum_min) / (lum_max - lum_min)
+                    # step 4: [0,1] -> [-1,1]
+                    curr_frame = curr_frame_01 * 2. - 1.
+                    print("Luminance remap: black={:.2f}, gray={:.2f}, white={:.2f} cd/m2".format(
+                        lum_target_min, (lum_target_min + lum_target_max) / 2., lum_target_max))
+
                 imgs_wrapped[frame_ind] = curr_frame
 
         # crop image
@@ -466,6 +483,22 @@ class Monitor(object):
 
         return imgs_wrapped, self.deg_coord_y, self.deg_coord_x, imgs_dewrapped, deg_coord_alt_dewrapped, \
                deg_coord_azi_dewrapped
+
+    def set_luminance_from_psychopy(self, psychopy_mon_name, calibration_name=None):
+        from psychopy import monitors as psychopy_monitors
+        mon = psychopy_monitors.Monitor(psychopy_mon_name)
+        if calibration_name is not None:
+            mon.setCurrent(calibration_name)
+        print("Reading luminance from: {}, calibration: {}".format(
+            psychopy_mon_name, mon.currentCalib))
+        gamma_grid = mon.getGammaGrid()
+        if gamma_grid is None:
+            print("Warning: no gamma calibration found for '{}', "
+                "luminance_range not set.".format(psychopy_mon_name))
+            return                          # don't crash, just skip
+        self.luminance_range = (gamma_grid[0, 0], gamma_grid[0, 1])
+        print("Monitor physical range: {:.2f} - {:.2f} cd/m2".format(
+            self.luminance_range[0], self.luminance_range[1]))
 
 
 class Indicator(object):

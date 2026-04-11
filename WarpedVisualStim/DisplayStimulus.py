@@ -7,7 +7,7 @@ be used to save and export movies of experimental stimulus routines for
 presentation.
 '''
 
-from psychopy import visual, event
+from psychopy import visual, event, monitors
 import PIL
 import os
 import datetime
@@ -277,6 +277,7 @@ class DisplaySequence(object):
         v_range = (vmax - vmin)
         any_array_nor = ((any_array - vmin) / v_range).astype(np.float16)
         self.sequence = 2 * (any_array_nor - 0.5)
+        self.sequence = self._apply_gamma_correction(self.sequence)
 
         if log_dict != None:
             if type(log_dict) is dict:
@@ -316,7 +317,6 @@ class DisplaySequence(object):
                 raise LookupError('Stimulus {} does not support indexed display.'.format(stim.name))
 
             self.sequence, self.seq_log = stim.generate_movie_by_index()
-            self.clear()
 
         else:
             if stim.stim_name in ['LocallySparseNoise', 'StaticGratingCircle', 'NaturalScene']:
@@ -324,7 +324,9 @@ class DisplaySequence(object):
                                   'indexed display instead (set self.is_by_index = True).')
 
             self.sequence, self.seq_log = stim.generate_movie()
-            self.clear()
+
+        self.sequence = self._apply_gamma_correction(self.sequence)
+        self.clear()
 
     def trigger_display(self):
         """
@@ -405,8 +407,9 @@ class DisplaySequence(object):
         # start psychopy window
         window = visual.Window(size=resolution,
                                monitor=self.psychopy_mon,
-                               fullscr=True,
                                gammaErrorPolicy="ignore",
+                               fullscr=True,
+                               gamma=1.0,
                                screen=self.display_screen,
                                color=self.initial_background_color)
         
@@ -417,6 +420,7 @@ class DisplaySequence(object):
                                      monitor=self.psychopy_nonused_mon,
                                      fullscr=True,
                                      gammaErrorPolicy="ignore",
+                                     gamma=1.0,
                                      screen=self.nonused_screen,
                                      color=self.initial_background_color)
 
@@ -456,6 +460,27 @@ class DisplaySequence(object):
         self.clear()
 
         return save_path, log_dict
+
+    def _apply_gamma_correction(self, sequence):
+        mon = monitors.Monitor(self.psychopy_mon)
+        print("Monitor: {}".format(self.psychopy_mon))
+        print("Using calibration: {}".format(mon.currentCalib))
+        
+        gamma_grid = mon.getGammaGrid()
+        
+        if gamma_grid is None:
+            print("Warning: no gamma calibration found, skipping correction.")
+            return sequence
+
+        # row 0 = mean/luminance, row 1=R, 2=G, 3=B; col 2 = gamma exponent
+        gamma_mean = gamma_grid[0, 2]
+        print("Gamma grid:\n  R={:.4f}, G={:.4f}, B={:.4f}, mean={:.4f}".format(
+            gamma_grid[1, 2], gamma_grid[2, 2], gamma_grid[3, 2], gamma_mean))
+        print("Applying inverse gamma correction: gamma={:.4f}".format(gamma_mean))
+
+        seq_01 = np.clip((sequence.astype(np.float32) + 1.) / 2., 0., 1.)
+        seq_corrected = np.power(seq_01, 1.0 / gamma_mean)
+        return seq_corrected * 2. - 1.
 
     def _wait_for_trigger(self, event):
         """
