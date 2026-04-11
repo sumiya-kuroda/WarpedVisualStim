@@ -47,10 +47,6 @@ def _make_overlapping_blocks(dims, blocksize=128, overlap=16):
     return blocks
 
 
-# ---------------------------------------------------------------------------
-# Public API
-# ---------------------------------------------------------------------------
-
 def approximate_svd(dat, frames_average,
                     onsets=None,
                     k=200,
@@ -61,24 +57,18 @@ def approximate_svd(dat, frames_average,
                     divide_by_average=True):
     """Approximate SVD by estimating U from a binned movie then projecting onto it.
 
-    This is equivalent to ``wfield.approximate_svd`` (Steinmetz et al. 2017).
-    Computes the mean-centred SVD; ``df/f`` must be computed separately afterwards
-    using the returned components.
-
     Parameters
     ----------
-    dat : array-like, shape (T, C, H, W)
-        Raw imaging data.  Accepts an in-memory numpy array or a
-        ``numpy.memmap`` (e.g. from ``wfieldanalysis.ip.mmap_dat``).
-    frames_average : ndarray, shape (C, H, W) or (N_trials, C, H, W)
-        Per-frame or per-trial baseline used for mean-centring.
+    dat : array-like, shape (T, H, W)
+        Raw imaging data.
+    frames_average : ndarray, shape (H, W)
+        Baseline used for mean-centring.
     onsets : array-like of int, optional
-        Trial onset frame indices.  When supplied the baseline is looked up
-        per trial; otherwise ``frames_average`` must be (C, H, W).
+        Trial onset frame indices for per-trial baseline lookup.
     k : int
         Number of SVD components to retain (default 200).
     mask : ndarray of bool, shape (H, W), optional
-        Spatial mask; pixels outside the mask are zeroed before decomposition.
+        Pixels outside the mask are zeroed before decomposition.
     nframes_per_bin : int
         Frames averaged into each bin when estimating U (default 15).
     nbinned_frames : int
@@ -86,84 +76,71 @@ def approximate_svd(dat, frames_average,
     nframes_per_chunk : int
         Frames loaded at once when projecting onto U (default 500).
     divide_by_average : bool
-        If True (default), compute ``(x - avg) / avg`` (df/f style);
-        otherwise compute ``x - avg``.
+        If True compute (x - avg) / avg; otherwise compute x - avg.
 
     Returns
     -------
     U : ndarray, shape (H, W, k)
         Spatial components.
-    SVT : ndarray, shape (k, T*C)
+    SVT : ndarray, shape (k, T)
         Temporal components (S·VT).
     """
     from sklearn.preprocessing import normalize
 
-    dims = dat.shape[1:]          # (C, H, W)
-    nframes = len(dat)
+    dims = dat.shape[1:]      # (H, W)
+    nframes = dat.shape[0]
+    npix = int(np.prod(dims)) # H * W
 
     # --- Step 1: bin the raw movie to estimate U ----------------------------
     if nbinned_frames < k:
         nframes_per_bin = int(np.clip(np.floor(nframes / k), 1, nframes_per_bin))
 
-    nbinned_frames = int(min(nbinned_frames,
-                             np.floor(nframes / nframes_per_bin)))
+    nbinned_frames = int(min(nbinned_frames, np.floor(nframes / nframes_per_bin)))
 
-    idx = np.arange(0, nbinned_frames * nframes_per_bin, nframes_per_bin,
-                    dtype='int')
+    idx = np.arange(0, nbinned_frames * nframes_per_bin, nframes_per_bin, dtype='int')
     if idx[-1] != nbinned_frames * nframes_per_bin:
         idx = np.hstack([idx, nbinned_frames * nframes_per_bin - 1])
 
-    binned = np.zeros([len(idx) - 1, *dims], dtype='float32')
+    binned = np.zeros([len(idx) - 1, npix], dtype='float32')
 
     for i in tqdm(range(len(idx) - 1), desc='Binning raw data'):
-        blk = _load_block(dat, idx[i], idx[i + 1] - idx[i])
-        avg = _get_trial_baseline(idx[i], frames_average, onsets)
+        blk = _load_block(dat, idx[i], idx[i + 1] - idx[i]).astype('float32')  # (chunk, H, W)
+        avg = _get_trial_baseline(idx[i], frames_average, onsets).astype('float32')
         if divide_by_average:
             binned[i] = np.mean(
-                (blk - (avg + np.float32(1e-10))) / (avg + np.float32(1e-10)),
-                axis=0)
+                (blk - avg) / (avg + np.float32(1e-10)),
+                axis=0).ravel()
         else:
-            binned[i] = np.mean(blk - (avg + np.float32(1e-10)), axis=0)
+            binned[i] = np.mean(blk - avg, axis=0).ravel()
 
         if mask is not None:
-            # broadcast mask over channels
-            mmask = np.broadcast_to(mask[np.newaxis], dims)
-            binned[i][mmask == 0] = 0.0
-
-    npix = int(np.prod(dims[-2:]))
-    binned = binned.reshape((-1, npix))
+            binned[i][~mask.ravel()] = 0.0
 
     # --- Step 2: SVD on the covariance of binned frames to get U ------------
     cov = np.dot(binned, binned.T) / npix
     cov = cov.astype('float32')
 
     u, s, v = _full_svd(cov)
-    U = normalize(np.dot(u[:, :k].T, binned), norm='l2', axis=1)
-    k = U.shape[0]   # may be smaller if variance is low
+    U = normalize(np.dot(u[:, :k].T, binned), norm='l2', axis=1)  # (k, npix)
+    k = U.shape[0]  # may be smaller if variance is low
 
-    # --- Step 3: project full data onto U to get SVT -----------------------
-    if onsets is None:
-        idx = np.arange(0, nframes, nframes_per_chunk, dtype='int')
-    else:
-        idx = np.asarray(onsets, dtype='int')
-
+    # --- Step 3: project full data onto U to get SVT ------------------------
+    idx = np.arange(0, nframes, nframes_per_chunk, dtype='int')
     if idx[-1] != nframes:
-        idx = np.hstack([idx, nframes - 1])
+        idx = np.hstack([idx, nframes])
 
-    V = np.zeros((k, *dat.shape[:2]), dtype='float32')
+    SVT = np.zeros((k, nframes), dtype='float32')
 
     for i in tqdm(range(len(idx) - 1), desc='Computing SVT from raw data'):
-        blk = _load_block(dat, idx[i], idx[i + 1] - idx[i])
+        blk = _load_block(dat, idx[i], idx[i + 1] - idx[i]).astype('float32')  # (chunk, H, W)
+        chunk_len = blk.shape[0]
         avg = _get_trial_baseline(idx[i], frames_average, onsets).astype('float32')
-        blk -= avg + np.float32(1e-10)
+        blk -= avg
         if divide_by_average:
             blk /= avg + np.float32(1e-10)
-        V[:, idx[i]:idx[i + 1], :] = np.dot(
-            U, blk.reshape([-1, npix]).T
-        ).reshape((k, -1, dat.shape[1]))
+        SVT[:, idx[i]:idx[i] + chunk_len] = np.dot(U, blk.reshape([chunk_len, npix]).T)  # (k, chunk)
 
-    SVT = V.reshape((k, -1))
-    U = U.T.reshape([*dims[-2:], -1])
+    U = U.T.reshape([*dims, k])  # (H, W, k)
     return U, SVT
 
 
@@ -272,15 +249,12 @@ def _complete_svd_from_blocks(block_U, block_SVT, blocks, k, dims,
     U = np.dot(_assemble_blockwise_spatial(block_U, blocks, dims), u)
     return U, SVT, S
 
-def run_svd(destination: Path, dat_path: Path, frames_average_path: Path, method='approximate'):
+def run_svd(destination: Path, movie: np.array, frames_average: np.array, method='approximate'):
     U_path = destination /'U.npy'
     SVT_path = destination /'SVT.npy'
     if not U_path.exists():
-        dat = load_dat(str(dat_path)) 
-        frames_average = np.load(frames_average_path)
-
         if method == 'approximate':
-            U,SVT = approximate_svd(dat, frames_average)
+            U,SVT = approximate_svd(movie, frames_average)
         else:
             raise NotImplementedError
         
