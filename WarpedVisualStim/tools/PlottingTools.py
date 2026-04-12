@@ -489,6 +489,53 @@ def value_2_rgb(value, cmap):
     color = [int(x * 255) for x in color]
     return get_color_str(*color)
 
+def plot_nidaq_channels(channel_data_list, channel_names, channel_type, log_fname):
+    """
+    Plot NIDAQ channel recordings in a stacked subplot figure.
+ 
+    Parameters
+    ----------
+    channel_data_list : list of np.ndarray
+        List of 1D arrays, one per channel.
+    channel_names : list of str
+        Channel name labels (e.g. 'ai0', 'ci0').
+    channel_type : str
+        'AI' or 'CI', used for the figure title.
+    log_fname : str
+        Session filename stem, used for the figure title and optional save path.
+    """
+    n = len(channel_data_list)
+    if n == 0:
+        return
+ 
+    fig, axes = plt.subplots(
+        n, 1,
+        figsize=(14, 2.5 * n),
+        sharex=True,
+        gridspec_kw={'hspace': 0.4}
+    )
+    if n == 1:
+        axes = [axes]
+ 
+    fig.suptitle(f'{channel_type} channels — {log_fname}', fontsize=11, fontweight='bold', y=1.01)
+ 
+    for ax, data, name in zip(axes, channel_data_list, channel_names):
+        t = np.arange(len(data))
+        ax.plot(t, data, lw=0.6, color='steelblue', rasterized=True)
+        ax.set_ylabel(name, fontsize=9, labelpad=4)
+        ax.tick_params(axis='both', labelsize=8)
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ymin, ymax = data.min(), data.max()
+        margin = (ymax - ymin) * 0.1 if ymax != ymin else 0.5
+        ax.set_ylim(ymin - margin, ymax + margin)
+ 
+    axes[-1].set_xlabel('Sample index', fontsize=9)
+ 
+    plt.tight_layout()
+
+    plt.show()
+ 
 
 if __name__ == '__main__':
     plt.ioff()
