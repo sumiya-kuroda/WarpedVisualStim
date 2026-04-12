@@ -257,11 +257,11 @@ def compute_phase_maps(dff: np.ndarray, df_stim: pd.DataFrame,
     # --- Step 2: combine opposite directions to cancel hemodynamic delay ---
     a1 = np.mod(-np.angle(fft_maps['B2U']), 2 * np.pi)
     a2 = np.mod(-np.angle(fft_maps['U2B']), 2 * np.pi)
-    elevation = remap_range((a2 - a1) / 2, *elevation_range)
+    elevation = remap_range((a1 - a2) / 2, *elevation_range)
 
     a1 = np.mod(-np.angle(fft_maps['L2R']), 2 * np.pi)
     a2 = np.mod(-np.angle(fft_maps['R2L']), 2 * np.pi)
-    azimuth = remap_range((a2 - a1) / 2, *azimuth_range)
+    azimuth = remap_range((a1 - a2) / 2, *azimuth_range)
 
     # --- Step 3: magnitude ---
     magnitude = np.sqrt(
