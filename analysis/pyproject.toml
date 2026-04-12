@@ -13,6 +13,7 @@ dependencies = [
   "scikit-learn",
   "holoviews",
   "bokeh",
+  "scikit-image",
   "ipykernel"
 ]
 
