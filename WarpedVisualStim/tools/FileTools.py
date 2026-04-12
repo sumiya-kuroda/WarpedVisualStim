@@ -693,6 +693,29 @@ def clear_daqlogger_temp(dir, fname_stem):
     shutil.move(Path(expanduser("~")) / '.daqlogger_temp_ci.bin', os.path.join(dir, fname_stem + '_ci.bin'))
     os.remove(Path(expanduser("~")) / '.daqlogger_temp.yaml')
 
+def get_protocol_tag(log_fname):
+    """
+    Infer protocol tag from log filename for use in session directory name.
+ 
+    Mapping:
+        KSStim*         -> 'mapping'
+        DriftingGrating -> 'driftinggrating'
+        StaticImage*    -> 'naturalimage'
+        LocallySparseNoise / LSN -> 'locallysparsednoise'
+        anything else   -> 'unknown'
+    """
+    fname_lower = log_fname.lower()
+    if 'ksstim' in fname_lower:
+        return 'mapping'
+    elif 'driftinggrating' in fname_lower:
+        return 'driftinggrating'
+    elif 'staticimage' in fname_lower or 'naturalscene' in fname_lower:
+        return 'naturalimage'
+    elif 'locallysparsednoise' in fname_lower or 'lsn' in fname_lower:
+        return 'locallysparsednoise'
+    else:
+        return 'unknown'
+
 if __name__ == '__main__':
     # ----------------------------------------------------------------------------
     print(int2str(5))

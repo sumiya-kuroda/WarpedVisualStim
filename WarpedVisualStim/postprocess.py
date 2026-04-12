@@ -1,7 +1,7 @@
 # This script postoricess data and upload it to ceph
 from pathlib import Path
 from psychopy import gui, core
-from WarpedVisualStim.tools.FileTools import load_protocol, saveFile
+from WarpedVisualStim.tools.FileTools import load_protocol, saveFile, get_protocol_tag
 from WarpedVisualStim.tools.PlottingTools import plot_nidaq_channels
 from WarpedVisualStim.DisplayLogAnalysis import DisplayLogAnalyzer
 from os.path import expanduser, split
@@ -38,8 +38,8 @@ if postprocess_settings['format'] == 'neuroblueprint':
  
     sub_dir_name = 'sub-' + postprocessInfo['SubjectID']
     ses_date = local_log_fname.split('_')[0][-8:]
-    ses_dir_name = 'ses-' + postprocessInfo['SessionID'] + '_date-' + ses_date
- 
+    protocol_tag = get_protocol_tag(local_log_fname)
+    ses_dir_name = 'ses-' + postprocessInfo['SessionID'] + '_protocol-' + protocol_tag + '_date-' + ses_date
     if postprocessInfo["Upload data to server?"]:
         server_behav_backup_location = Path(postprocess_settings['path_to_server']) / 'rawdata' / sub_dir_name / ses_dir_name / postprocessInfo['Datatype']
         server_behav_backup_location.mkdir(parents=True, exist_ok=True)
