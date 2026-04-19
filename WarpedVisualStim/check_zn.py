@@ -1,11 +1,14 @@
 from psychopy import visual, core, event
 from WarpedVisualStim.tools.FileTools import get_abspath
+from WarpedVisualStim.gamma.rectangles import get_gamma_grid, apply_gamma_correction
 from rich.prompt import Prompt
 
 # -------------------------
 # SETTINGS
 # -------------------------
 setup = Prompt.ask("Which setup are you using", default="2p313")
+contrast = float(Prompt.ask("Contrast (0.0 – 1.0)", default="1.0"))
+
 if '313' in setup:
     print('You are using 2p313 setup')
     setup = '2p313'
@@ -68,6 +71,13 @@ try:
 except Exception:
     pass
 
+try:
+    gamma_grid = get_gamma_grid("testMonitor")
+except Exception as e:
+    print(f"Warning: could not load gamma grid ({e}).")
+    gamma_grid = None
+print(f"Contrast set to: {contrast:.2f}")
+
 # -------------------------
 # GRID POSITIONS
 # -------------------------
@@ -97,6 +107,7 @@ key_to_grid.update({f"kp{i}": str(i) for i in range(1, 10)})
 movie = visual.MovieStim3(win, filename=MOVIE_PATH, loop=True, noAudio=True)
 movie.size = MOVIE_SIZE
 movie.pos = pos_map["5"]
+movie.contrast = contrast
 
 # -------------------------
 # MAIN LOOP
