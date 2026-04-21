@@ -7,6 +7,18 @@ from WarpedVisualStim.tools.FileTools import load_protocol, search_protcol
 from psychopy import gui, core
 from datetime import datetime, timezone
 from os.path import expanduser
+import matplotlib.pyplot as plt
+import WarpedVisualStim.StimulusRoutines as stim
+from WarpedVisualStim.MonitorSetup import Monitor, Indicator
+from WarpedVisualStim.DisplayStimulus import DisplaySequence
+from WarpedVisualStim.tools.FileTools import load_protocol, search_protcol, save_session_setting, dump_taskinfo, clear_daqlogger_temp
+from WarpedVisualStim.tools.GenericTools import make_nested_lst_of_tuples
+from psychopy import gui, core
+from datetime import datetime, timezone
+from os.path import expanduser, split
+from rich.prompt import Prompt
+import os
+from pathlib import Path
 
 # ================ Load protocol and Enter session information ==================================
 expInfo = {
@@ -16,7 +28,7 @@ expInfo = {
     'Protocol': search_protcol("./protocols"),
     'Saving location': [str(expanduser("~")), 'D:/SuKu_RawData'],
     'Luminance (cd/m2)': 8.0,
-    'Duration (s)': 7200.0,
+    'Duration (s)': 1800.0,
 }
 dlg = gui.DlgFromDict(dictionary=expInfo, title='Gray Screen', screen=0, sortKeys=False)
 if dlg.OK == False:
@@ -81,6 +93,26 @@ ds = DisplaySequence(log_dir=expInfo['Saving location'],
                      is_by_index=True,
                      is_save_sequence=False)
 
+
 ds.set_stim(uc)
-ds.trigger_display()
+if task_protocol["ds_use_daqlogger"]:
+    dump_taskinfo('./protocols/{}.json'.format(expInfo['Protocol']))
+    Prompt.ask('Run [bold magenta]avi_recorder.bonsai[/bold magenta] to start recording cameras. Press return to continue when ready')
+    Prompt.ask('Run [bold magenta]python daqlogger.py[/bold magenta] to start recording NIDAQ. Press return to continue when ready')
+else:
+      pass
+
+Prompt.ask('Start [bold magenta]Grab[/bold magenta] on ScanImage. Press return to continue when ready')
+saved_file, _ = ds.trigger_display()
+
+input('please stop daqlogger now. Press return to continue when ready')
+if task_protocol["ds_use_daqlogger"]:
+    if not 'test' in expInfo['Mouse ID']:
+        clear_daqlogger_temp(ds.directory, split(saved_file)[1].split('.')[0])
+    else:
+        print('Due to test session, DAQ Logger was not used')
+save_session_setting(task_protocol, expInfo, 
+                     split(saved_file)[0], 
+                     split(saved_file)[1].split('.')[0] + '_settings.json')
+
 # =================================================================================

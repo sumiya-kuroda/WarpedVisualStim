@@ -701,7 +701,7 @@ def get_protocol_tag(log_fname):
         KSStim*         -> 'mapping'
         DriftingGrating -> 'driftinggrating'
         StaticImage*    -> 'naturalimage'
-        LocallySparseNoise / LSN -> 'locallysparsednoise'
+        LocallySparseNoise-> 'locallysparsenoise'
         anything else   -> 'unknown'
     """
     fname_lower = log_fname.lower()
@@ -711,8 +711,8 @@ def get_protocol_tag(log_fname):
         return 'driftinggrating'
     elif 'staticimage' in fname_lower or 'naturalscene' in fname_lower:
         return 'naturalimage'
-    elif 'locallysparsednoise' in fname_lower or 'lsn' in fname_lower:
-        return 'locallysparsednoise'
+    elif 'locallysparsenoise' in fname_lower or 'lsn' in fname_lower:
+        return 'locallysparsenoise'
     else:
         return 'unknown'
 

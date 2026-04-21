@@ -45,6 +45,7 @@ if postprocess_settings['format'] == 'neuroblueprint':
         server_behav_backup_location.mkdir(parents=True, exist_ok=True)
         server_funcimg_backup_location = Path(postprocess_settings['path_to_server']) / 'rawdata' / sub_dir_name / ses_dir_name / 'funcimg'
         server_funcimg_backup_location.mkdir(parents=True, exist_ok=True)
+        print(server_behav_backup_location)
  
         shutil.copy2(local_log_path + '/' + local_log_fname + '.pkl', str(server_behav_backup_location))
         shutil.copy2(local_log_path + '/' + local_log_fname + '_settings.json', str(server_behav_backup_location))

@@ -73,7 +73,7 @@ class Monitor(object):
                  name='testMonitor',
                  gamma=None,
                  gamma_grid=None,
-                 luminance=(0,20),
+                 luminance=(0.15,17), #TODO: add to config
                  downsample_rate=10,
                  refresh_rate=60.):
         """
