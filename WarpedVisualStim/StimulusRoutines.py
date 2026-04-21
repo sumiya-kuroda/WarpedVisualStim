@@ -78,9 +78,6 @@ def get_warped_probes(deg_coord_alt, deg_coord_azi, probes, width,
 
     frame = np.ones(deg_coord_azi.shape, dtype=np.float32) * background_color
 
-    # if ori < 0. or ori > 180.:
-    #      raise ValueError, 'ori should be between 0 and 180.'
-
     ori_arc = (ori % 360.) * 2 * np.pi / 360.
 
     for probe in probes:
@@ -89,15 +86,6 @@ def get_warped_probes(deg_coord_alt, deg_coord_azi, probes, width,
 
         dis_height = np.abs(np.cos(ori_arc + np.pi / 2) * (deg_coord_azi - probe[1]) +
                             np.sin(ori_arc + np.pi / 2) * (deg_coord_alt - probe[0]))
-
-        # f, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
-        # fig1 = ax1.imshow(dis_width)
-        # ax1.set_title('width')
-        # f.colorbar(fig1, ax=ax1)
-        # fig2 = ax2.imshow(dis_height)
-        # ax2.set_title('height')
-        # f.colorbar(fig2, ax=ax2)
-        # plt.show()
 
         frame[np.logical_and(dis_width <= width / 2.,
                              dis_height <= height / 2.)] = probe[2]
@@ -128,13 +116,8 @@ def blur_cos(dis, sigma):
 
     blur_band = (np.cos((dis_f - (sigma_f / -2.)) * np.pi / sigma_f) + 1.) / 2.
 
-    # plt.imshow(blur_band)
-    # plt.show()
-
     blur_band[dis_f < (sigma_f / -2.)] = 1.
     blur_band[dis_f > (sigma_f / 2.)] = 0.
-
-    # print blur_band.dtype
 
     return blur_band
 
@@ -181,8 +164,6 @@ def get_circle_mask(map_alt, map_azi, center, radius, is_smooth_edge=False,
         raise ValueError('map_alt and map_azi should be 2-d.')
 
     dis_mat = np.sqrt((map_alt - center[0]) ** 2 + (map_azi - center[1]) ** 2)
-    # plt.imshow(dis_mat)
-    # plt.show()
 
     if is_smooth_edge:
         sigma = radius * blur_ratio
@@ -248,47 +229,6 @@ def get_grating(alt_map, azi_map, dire=0., spatial_freq=0.1,
     grating = (grating + 1.) / 2.  # change the scale of grating to be [0., 1.]
 
     return grating
-
-
-# def get_sparse_loc_num_per_frame(min_alt, max_alt, min_azi, max_azi, minimum_dis):
-#     """
-#     given the subregion of visual space and the minmum distance between the probes
-#     within a frame (definition of sparseness), return generously how many probes
-#     will be presented of a given frame
-#
-#     Parameters
-#     ----------
-#     min_alt : float
-#         minimum altitude of display region, in visual degrees
-#     max_alt : float
-#         maximum altitude of display region, in visual degrees
-#     min_azi : float
-#         minimum azimuth of display region, in visual degrees
-#     max_azi : float
-#         maximum azimuth of display region, in visual degrees
-#     minimum_dis : float
-#         minimum distance allowed among probes within a frame
-#
-#     returns
-#     -------
-#     probe_num_per_frame : uint
-#         generously how many probes will be presented in a given frame
-#     """
-#     if min_alt >= max_alt:
-#         raise ValueError('min_alt should be less than max_alt.')
-#
-#     if min_azi >= max_azi:
-#         raise ValueError('min_azi should be less than max_azi.')
-#
-#     min_alt = float(min_alt)
-#     max_alt = float(max_alt)
-#     min_azi = float(min_azi)
-#     max_azi = float(max_azi)
-#
-#     area_tot = (max_alt - min_alt) * (max_azi - min_azi)
-#     area_circle = np.pi * (minimum_dis ** 2)
-#     probe_num_per_frame = int(np.ceil((2.0 * (area_tot / area_circle))))
-#     return probe_num_per_frame
 
 
 def get_grid_locations(subregion, grid_space, monitor_azi, monitor_alt, is_include_edge=True,
@@ -361,8 +301,6 @@ def get_grid_locations(subregion, grid_space, monitor_azi, monitor_alt, is_inclu
         grid_locations = grid_locations[in_hull(grid_locations, monitorPoints_e)]
     else:
         grid_locations = grid_locations[in_hull(grid_locations, monitorPoints)]
-
-    # grid_locations = np.array([grid_locations[:, 1], grid_locations[:, 0]]).transpose()
 
     if is_plot:
         f = plt.figure()
@@ -549,9 +487,6 @@ class Stim(object):
                                    - self.indicator.height_pixel / 2)
         indicator_height_max = int(self.indicator.center_height_pixel
                                    + self.indicator.height_pixel / 2)
-
-        # print('indicator width range (pixel): [{}, {}]'.format(indicator_width_min, indicator_width_max))
-        # print('indicator height range (pixel): [{}, {}]'.format(indicator_height_min, indicator_height_max))
 
         return indicator_width_min, indicator_width_max, \
                indicator_height_min, indicator_height_max
@@ -1121,10 +1056,6 @@ class FlashingCircle(Stim):
         indicator_width_min, indicator_width_max, \
         indicator_height_min, indicator_height_max = self.get_indicator_range()
 
-        # background = self.background * np.ones((num_pixels_width,
-        #                                         num_pixels_height),
-        #                                        dtype=np.float32)
-
         if self.coordinate == 'degree':
             map_azi = self.monitor.deg_coord_x
             map_alt = self.monitor.deg_coord_y
@@ -1140,8 +1071,6 @@ class FlashingCircle(Stim):
                                       is_smooth_edge=self.is_smooth_edge,
                                       blur_ratio=self.smooth_width_ratio,
                                       blur_func=self.smooth_func).astype(np.float32)
-        # plt.imshow(circle_mask)
-        # plt.show()
 
         for i, frame in enumerate(self.frames_unique):
             if frame[0] == 1:
@@ -1525,10 +1454,6 @@ class SparseNoise(Stim):
                 probe_loc_0 = probe_locations[probe_ind[i]]
                 probe_loc_1 = probe_locations[probe_ind[i + 1]]
                 if np.array_equal(probe_loc_0, probe_loc_1):
-                    # print('overlapping probes detected. ind_{}:loc{}; ind_{}:loc{}'
-                    #       .format(i, probe_loc_0, i + 1, probe_loc_1))
-                    # print ('ind_{}:loc{}'.format((i + 2) % probe_num,
-                    #                              probe_locations[(i + 2) % probe_num]))
                     ind_temp = probe_ind[i + 1]
                     probe_ind[i + 1] = probe_ind[(i + 2) % probe_num]
                     probe_ind[(i + 2) % probe_num] = ind_temp
@@ -1616,7 +1541,6 @@ class SparseNoise(Stim):
         for i, frame in enumerate(self.frames_unique):
             if frame[0] == 1:
                 curr_probes = ([frame[1][0], frame[1][1], frame[2]],)
-                # print type(curr_probes)
                 disp_mat = get_warped_probes(deg_coord_alt=coord_alt,
                                              deg_coord_azi=coord_azi,
                                              probes=curr_probes,
@@ -2056,10 +1980,6 @@ class LocallySparseNoise(Stim):
         anymore and the biggest difference of probe numbers among all frames is
         no more than 1 (most evenly distributed).
 
-        the algorithm is implemented by self._redistribute_probes() function,
-        this is just to roughly massage the probes among frames, but not the
-        attempt to find the best solution.
-
         parameters
         ----------
         frames : list
@@ -2087,10 +2007,8 @@ class LocallySparseNoise(Stim):
             probe_diff = probe_nums[-1] - probe_nums[0]
         else:
             if not is_moved:
-                # print ('redistributing probes among frames: no more probes can be moved.')
                 pass
             if probe_diff <= 1:
-                # print ('redistributing probes among frames: probes already well distributed.')
                 pass
 
         return new_frames
@@ -2098,12 +2016,6 @@ class LocallySparseNoise(Stim):
     def _generate_frames_for_index_display(self):
         """
         compute the information that defines the frames used for index display
-
-        parameters
-        ----------
-        all_probes : list
-            all probes to be displayed, each element (center_alt, center_azi, sign). ideally
-            outputs of self._generate_all_probes()
 
         returns
         -------
@@ -2252,7 +2164,11 @@ class DriftingGratingCircle(Stim):
        list of radii of circles, unit defined by `self.coordinate`, defaults
        to `(10.)`
     block_dur : float, optional
-        duration of each condition in seconds, defaults to `2.`
+        duration of drifting period in seconds, defaults to `2.`
+    static_dur : float, optional
+        duration of stationary period before drifting in seconds, defaults to `0.`
+        indicator is white on first frame only, off for remainder of static period.
+        total block duration = block_dur + static_dur.
     midgap_dur : float, optional
         duration of gap between conditions, defaults to `0.5`
     iteration : int, optional
@@ -2269,9 +2185,7 @@ class DriftingGratingCircle(Stim):
         returns smoothed mask with same shape as input ndarray
     is_blank_block : bool
         if True, one blank block (full screen background with the same duration of other blocks)
-        will be displayed for each iteration. The frames of this condition will be:
-        (1, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0), the meaning of these numbers can be found in
-        self.frame_config
+        will be displayed for each iteration.
     is_random_start_phase : bool
         if True, the starting phase of each block will be randomized
         if False, the starting phase of each block will be 0 degree
@@ -2280,9 +2194,9 @@ class DriftingGratingCircle(Stim):
     def __init__(self, monitor, indicator, background=0., coordinate='degree',
                  center=(0., 60.), sf_list=(0.08,), tf_list=(4.,), dire_list=(0.,),
                  con_list=(0.5,), radius_list=(10.,), block_dur=2., midgap_dur=0.5,
-                 iteration=1, pregap_dur=2., postgap_dur=3., is_smooth_edge=False,
-                 smooth_width_ratio=0.2, smooth_func=blur_cos, is_blank_block=True,
-                 is_random_start_phase=False):
+                 static_dur=0., iteration=1, pregap_dur=2., postgap_dur=3.,
+                 is_smooth_edge=False, smooth_width_ratio=0.2, smooth_func=blur_cos,
+                 is_blank_block=True, is_random_start_phase=False):
         """
         Initialize `DriftingGratingCircle` stimulus object, inherits Parameters
         from `Stim` class
@@ -2321,6 +2235,11 @@ class DriftingGratingCircle(Stim):
         else:
             raise ValueError('midgap_dur should be no less than 0 second')
 
+        if static_dur >= 0.:
+            self.static_dur = float(static_dur)
+        else:
+            raise ValueError('static_dur should be no less than 0 second')
+
         self.iteration = iteration
         self.frame_config = ('is_display', 'isCycleStart', 'spatial frequency (cycle/deg)',
                              'temporal frequency (Hz)', 'direction (deg)',
@@ -2329,25 +2248,21 @@ class DriftingGratingCircle(Stim):
         self.is_blank_block = bool(is_blank_block)
 
         for tf in tf_list:
-
             if block_dur * tf < 1.:
                 print('Caution: the block_dur ({} second) is not long enough for displaying'
                       'a full cycle of temporal frequency {} Hz'.format(block_dur, tf))
-
-            # period = 1. / tf
-            #
-            # if (0.05 * period) < (block_dur % period) < (0.95 * period):
-            #     error_msg = ('Duration of each block times tf ' + str(tf)
-            #                  + ' should be close to a whole number!')
-            #     raise ValueError(error_msg)
 
     @property
     def midgap_frame_num(self):
         return int(self.midgap_dur * self.monitor.refresh_rate)
 
     @property
+    def static_frame_num(self):
+        return int(self.static_dur * self.monitor.refresh_rate)
+
+    @property
     def block_frame_num(self):
-        return int(self.block_dur * self.monitor.refresh_rate)
+        return int((self.block_dur + self.static_dur) * self.monitor.refresh_rate)
 
     def _generate_all_conditions(self):
         """
@@ -2376,7 +2291,7 @@ class DriftingGratingCircle(Stim):
     def _generate_phase_list(self, tf):
         """
         get a list of phases that will be displayed for each frame in the block
-        duration, also make the first frame of each cycle
+        duration. Prepends static_frame_num frames of phase=0. before drifting.
 
         Parameters
         ----------
@@ -2386,30 +2301,30 @@ class DriftingGratingCircle(Stim):
         Returns
         -------
         phases :
-            list of phases in one block
+            list of phases in one block (static + drift)
         frame_per_cycle :
-            number of frames for each circle
+            number of frames for each cycle
         """
+        static_frames = self.static_frame_num
 
         if tf == 0.:
             phases = [0.] * self.block_frame_num
             frame_per_cycle = self.block_frame_num
-
         else:
             frame_per_cycle = int(self.monitor.refresh_rate / tf)
-
             phases_per_cycle = list(np.arange(0, np.pi * 2, np.pi * 2 / frame_per_cycle))
 
             if self.is_random_start_phase:
                 start_ind = np.random.randint(low=len(phases_per_cycle), size=1)[0]
                 phases_per_cycle = phases_per_cycle[start_ind:] + phases_per_cycle[:start_ind]
 
+            drift_frame_num = self.block_frame_num - static_frames
             phases = []
-
-            while len(phases) < self.block_frame_num:
+            while len(phases) < drift_frame_num:
                 phases += phases_per_cycle
+            phases = phases[:drift_frame_num]
 
-            phases = phases[0: self.block_frame_num]
+        phases = [0.] * static_frames + phases
         return phases, frame_per_cycle
 
     @staticmethod
@@ -2452,7 +2367,6 @@ class DriftingGratingCircle(Stim):
 
         frames = []
         off_params = [0, None, None, None, None, None, None, None, -1.]
-        # midgap_frames = int(self.midgap_dur*self.monitor.refresh_rate)
 
         for i in range(self.iteration):
             if i == 0:  # very first block
@@ -2471,8 +2385,6 @@ class DriftingGratingCircle(Stim):
 
                 # get phase list for each condition
                 phases, frame_per_cycle = self._generate_phase_list(tf)
-                # if (dire % 360.) >= 90. and (dire % 360. < 270.):
-                #      phases = [-phase for phase in phases]
 
                 for k, phase in enumerate(phases):  # each frame in the block
 
@@ -2510,31 +2422,53 @@ class DriftingGratingCircle(Stim):
                                          this particular condition
         """
         phases, frame_per_cycle = self._generate_phase_list(condi_params[1])
+        static_frames = self.static_frame_num
 
-        if condi_params[0] == 0.: # blank block
-
+        if condi_params[0] == 0.:  # blank block
             frames_unique_condi = ((1, 1, 0., 0., 0., 0., 0., 0., 1.),
                                    (1, 1, 0., 0., 0., 0., 0., 0., 0.))
             index_to_display_condi = [1] * self.block_frame_num
             index_to_display_condi[0] = 0
 
         else:
-
-            phases_unique = phases[0:frame_per_cycle]
-
             frames_unique_condi = []
+
+            if static_frames > 0:
+                # static period: indicator white on first frame only
+                frames_unique_condi.append([1, 1, condi_params[0], condi_params[1],
+                                            condi_params[2], condi_params[3],
+                                            condi_params[4], 0., 1.])  # static on
+                frames_unique_condi.append([1, 0, condi_params[0], condi_params[1],
+                                            condi_params[2], condi_params[3],
+                                            condi_params[4], 0., 0.])  # static off
+                static_on_ind = 0
+                static_off_ind = 1
+                drift_offset = 2
+            else:
+                drift_offset = 0
+
+            # drift frames: one unique cycle
+            drift_phases = phases[static_frames:]
+            phases_unique = drift_phases[0:frame_per_cycle]
             for i, ph in enumerate(phases_unique):
-                if i == 0:
-                    frames_unique_condi.append([1, 1, condi_params[0], condi_params[1], condi_params[2],
-                                                condi_params[3], condi_params[4], ph, 1.])
-                else:
-                    frames_unique_condi.append([1, 0, condi_params[0], condi_params[1], condi_params[2],
-                                                condi_params[3], condi_params[4], ph, 0.])
+                is_first = (i == 0)
+                frames_unique_condi.append([1, int(is_first),
+                                            condi_params[0], condi_params[1],
+                                            condi_params[2], condi_params[3],
+                                            condi_params[4], ph,
+                                            1. if is_first else 0.])
 
             index_to_display_condi = []
-            while len(index_to_display_condi) < len(phases):
-                index_to_display_condi += range(frame_per_cycle)
-            index_to_display_condi = index_to_display_condi[0:len(phases)]
+
+            if static_frames > 0:
+                index_to_display_condi += [static_on_ind]                          # first static frame: white
+                index_to_display_condi += [static_off_ind] * (static_frames - 1)  # rest of static: off
+
+            drift_indices = []
+            while len(drift_indices) < (self.block_frame_num - static_frames):
+                drift_indices += list(range(drift_offset, drift_offset + frame_per_cycle))
+            drift_indices = drift_indices[:(self.block_frame_num - static_frames)]
+            index_to_display_condi += drift_indices
 
             frames_unique_condi = tuple([tuple(f) for f in frames_unique_condi])
 
@@ -2543,31 +2477,10 @@ class DriftingGratingCircle(Stim):
     def _generate_frames_unique_and_condi_ind_dict(self):
         """
         compute the information that defines the frames used for index display
-
-        :return frames_unique
-                the condi_ind_in_frames_unique:
-                    {
-                     condi_key (same condi_key as condi_dict):
-                           list of non-negative integers representing the indices of this
-                           particular condition in frames_unique
-                    }
         """
         if self.indicator.is_sync:
 
             all_conditions = self._generate_all_conditions()
-
-            '''
-            cond_dict is a dictionary constructed as following
-                {
-                condi_key (i.e. condi_0000):
-                     {
-                      'frames_unique': list of unique frame parameters for this particual condition
-                                       [is_display, is_first_in_cycle, sf, tf, dire,
-                                       con, size, phase, indicator_color],
-                      'index_to_display': list of non-negative integers,
-                     }
-                }
-            '''
 
             condi_dict = {}
             for i, condi in enumerate(all_conditions):
@@ -2648,7 +2561,6 @@ class DriftingGratingCircle(Stim):
     def generate_movie_by_index(self):
         """ compute the stimulus movie to be displayed by index. """
         self.frames_unique, self.index_to_display = self._generate_display_index()
-        # print '\n'.join([str(f) for f in self.frames_unique])
 
         mask_dict = self._generate_circle_mask_dict()
 
@@ -2680,8 +2592,6 @@ class DriftingGratingCircle(Stim):
         for i, frame in enumerate(self.frames_unique):
 
             if frame[0] == 1 and frame[2] != 0.:  # not a gap and not a blank block
-
-                # curr_ori = self._get_ori(frame[3])
 
                 curr_grating = get_grating(alt_map=coord_alt,
                                            azi_map=coord_azi,
@@ -2769,9 +2679,8 @@ class DriftingGratingCircle(Stim):
 
         for i, curr_frame in enumerate(self.frames):
 
-            if curr_frame[0] == 1 and curr_frame[2] != 0. :  # not a gap and not a blank block
+            if curr_frame[0] == 1 and curr_frame[2] != 0.:  # not a gap and not a blank block
 
-                # curr_ori = self._get_ori(curr_frame[4])
                 curr_grating = get_grating(alt_map=coord_alt,
                                            azi_map=coord_azi,
                                            dire=curr_frame[4],
@@ -2779,8 +2688,6 @@ class DriftingGratingCircle(Stim):
                                            center=self.center,
                                            phase=curr_frame[7],
                                            contrast=curr_frame[5])
-                # plt.imshow(curr_grating)
-                # plt.show()
 
                 curr_grating = curr_grating * 2. - 1.  # change scale from [0., 1.] to [-1., 1.]
 
@@ -2871,8 +2778,6 @@ class StaticGratingCircle(Stim):
         returns smoothed mask with same shape as input ndarray
     is_blank_block : bool, optional
         if True, a full screen background will be displayed as an additional grating.
-        The frames of this condition will be: (1, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 or 0.0),
-        the meaning of these numbers can be found in self.frame_config
     """
 
     def __init__(self, monitor, indicator, background=0., coordinate='degree',
@@ -3053,8 +2958,6 @@ class StaticGratingCircle(Stim):
         """ compute the stimulus movie to be displayed by index. """
         self.frames_unique, self.index_to_display = self._generate_display_index()
 
-        # print '\n'.join([str(f) for f in self.frames_unique])
-
         mask_dict = self._generate_circle_mask_dict()
 
         num_unique_frames = len(self.frames_unique)
@@ -3085,8 +2988,6 @@ class StaticGratingCircle(Stim):
         for i, frame in enumerate(self.frames_unique):
 
             if frame[0] == 1 and frame[1] != 0:  # not a gap and not a blank grating
-
-                # curr_ori = self._get_ori(frame[3])
 
                 curr_grating = get_grating(alt_map=coord_alt,
                                            azi_map=coord_azi,
@@ -3219,39 +3120,6 @@ class StaticImages(Stim):
         look for the 'images_original.tif' in the work_dir, load the images,
         warp and luminance correct images, save wrapping results in an HDF5 file
         with name "wrapped_images_for_display.hdf5" in the work_dir
-
-        datasets
-        --------
-        images_wrapped : 3d array, frame x altitude x azimuth,
-            each frame will have  same shape as the pixel resolution of down
-            sampled self.monitor
-
-            attrs
-            +++++
-            altitude : 2d array, altitude x azimuth
-                altitude coordinates of wrapped images in visual degrees,
-                same shape as each frame of images_wrapped
-            azimuth : 2d array, altitude x azimuth
-                azimuth coordinates of wrapped images in visual degrees,
-                same shape as each frame of images_wrapped
-
-        images_dewrapped : 3d array, frame x altitude x azimuth
-            dewrapped images, please note there is no pixel to pixel relationship
-            between images_wrapped and images_dewrapped. Different regions in
-            images_dewrapped have different sampling density to generate
-            images_wrapped. Some pixels in image_dewrapped (especially on the edge)
-            may not get presented by image_wrapped. images_dewrapped represent the
-            minimum rectangle region in the original image that cover the entire
-            images_wrapped.
-
-            attrs
-            +++++
-            altitude : 2d array, altitude x azimuth
-                altitude coordinates of dewrapped images in visual degrees,
-                same shape as each frame in images_dewrapped
-            azimuth : 2d array, altitude x azimuth
-                azimuth coordinates of dewrapped images in visual degrees,
-                same shape as each frame in images_dewrapped
         """
 
         imgs = tf.imread(self.path_images)
@@ -3305,12 +3173,6 @@ class StaticImages(Stim):
         set 3d arrays from a hdf5 file for display. Ideally the hdf5 file should be
         the result from self.wrap_images() method. Only designed to work with wrapped
         images
-
-        parameters
-        ----------
-        imgs_file_path : str
-            system path ot the hdf5 file. It should have at least one dataset named
-            'images_wrapped' containing a 3d array of wrapped images to display
         """
         img_f = h5py.File(imgs_file_path, 'r')
 
@@ -3465,8 +3327,6 @@ class StaticImages(Stim):
         """ compute the stimulus movie to be displayed by index. """
         self.frames_unique, self.index_to_display = self._generate_display_index()
 
-        # print '\n'.join([str(f) for f in self.frames_unique])
-
         if self.coordinate == 'degree':
             coord_azi = self.monitor.deg_coord_x
             coord_alt = self.monitor.deg_coord_y
@@ -3608,9 +3468,6 @@ class StimulusSeparator(Stim):
                                         dtype=np.float32)
 
         for i, frame in enumerate(self.frames_unique):
-
-            # print('{}: {}'.format(i, frame[-1]))
-            # print('{}:{}, {}:{}'.format(indicator_width_min, indicator_width_max, indicator_height_min, indicator_height_max))
 
             # add sync square for photodiode
             mov[i, indicator_height_min:indicator_height_max,
@@ -4424,6 +4281,7 @@ class KSstimSeqDir(object):
 
         return mov, log
 
+
 class DriftingGratingMultipleCircle(Stim):
     """
     Generate drifting grating circle stimulus with multiple center coordinates
@@ -4466,7 +4324,11 @@ class DriftingGratingMultipleCircle(Stim):
        list of radii of circles, unit defined by `self.coordinate`, defaults
        to `(10.)`
     block_dur : float, optional
-        duration of each condition in seconds, defaults to `2.`
+        duration of drifting period in seconds, defaults to `2.`
+    static_dur : float, optional
+        duration of stationary period before drifting in seconds, defaults to `0.`
+        indicator is white on first frame only, off for remainder of static period.
+        total block duration = block_dur + static_dur.
     midgap_dur : float, optional
         duration of gap between conditions, defaults to `0.5`
     iteration : int, optional
@@ -4483,9 +4345,7 @@ class DriftingGratingMultipleCircle(Stim):
         returns smoothed mask with same shape as input ndarray
     is_blank_block : bool
         if True, one blank block (full screen background with the same duration of other blocks)
-        will be displayed for each iteration. The frames of this condition will be:
-        (1, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0), the meaning of these numbers can be found in
-        self.frame_config
+        will be displayed for each iteration.
     is_random_start_phase : bool
         if True, the starting phase of each block will be randomized
         if False, the starting phase of each block will be 0 degree
@@ -4497,9 +4357,9 @@ class DriftingGratingMultipleCircle(Stim):
     def __init__(self, monitor, indicator, background=0., coordinate='degree',
                  center_list: list =[(0., 60.),], sf_list=(0.08,), tf_list=(4.,), dire_list=(0.,),
                  con_list=(0.5,), radius_list=(10.,), block_dur=2., midgap_dur=0.5,
-                 iteration=1, pregap_dur=2., postgap_dur=3., is_smooth_edge=False,
-                 smooth_width_ratio=0.2, smooth_func=blur_cos, is_blank_block=True,
-                 is_random_start_phase=False, inverse=False):
+                 static_dur=0., iteration=1, pregap_dur=2., postgap_dur=3.,
+                 is_smooth_edge=False, smooth_width_ratio=0.2, smooth_func=blur_cos,
+                 is_blank_block=True, is_random_start_phase=False, inverse=False):
         """
         Initialize `DriftingGratingMultipleCircle` stimulus object, inherits Parameters
         from `Stim` class
@@ -4539,6 +4399,11 @@ class DriftingGratingMultipleCircle(Stim):
         else:
             raise ValueError('midgap_dur should be no less than 0 second')
 
+        if static_dur >= 0.:
+            self.static_dur = float(static_dur)
+        else:
+            raise ValueError('static_dur should be no less than 0 second')
+
         self.iteration = iteration
         self.frame_config = ('is_display', 'isCycleStart', 'spatial frequency (cycle/deg)',
                              'temporal frequency (Hz)', 'direction (deg)',
@@ -4547,25 +4412,21 @@ class DriftingGratingMultipleCircle(Stim):
         self.is_blank_block = bool(is_blank_block)
 
         for tf in tf_list:
-
             if block_dur * tf < 1.:
                 print('Caution: the block_dur ({} second) is not long enough for displaying'
                       'a full cycle of temporal frequency {} Hz'.format(block_dur, tf))
-
-            # period = 1. / tf
-            #
-            # if (0.05 * period) < (block_dur % period) < (0.95 * period):
-            #     error_msg = ('Duration of each block times tf ' + str(tf)
-            #                  + ' should be close to a whole number!')
-            #     raise ValueError(error_msg)
 
     @property
     def midgap_frame_num(self):
         return int(self.midgap_dur * self.monitor.refresh_rate)
 
     @property
+    def static_frame_num(self):
+        return int(self.static_dur * self.monitor.refresh_rate)
+
+    @property
     def block_frame_num(self):
-        return int(self.block_dur * self.monitor.refresh_rate)
+        return int((self.block_dur + self.static_dur) * self.monitor.refresh_rate)
 
     def _generate_all_conditions(self):
         """
@@ -4576,7 +4437,7 @@ class DriftingGratingMultipleCircle(Stim):
         -------
         all_conditions : list of tuples
              all unique combinations of spatial frequency, temporal frequency,
-             direction, contrast, and radius. Output depends on initialization
+             direction, contrast, radius, and center. Output depends on initialization
              parameters.
 
         """
@@ -4595,7 +4456,7 @@ class DriftingGratingMultipleCircle(Stim):
     def _generate_phase_list(self, tf):
         """
         get a list of phases that will be displayed for each frame in the block
-        duration, also make the first frame of each cycle
+        duration. Prepends static_frame_num frames of phase=0. before drifting.
 
         Parameters
         ----------
@@ -4605,30 +4466,30 @@ class DriftingGratingMultipleCircle(Stim):
         Returns
         -------
         phases :
-            list of phases in one block
+            list of phases in one block (static + drift)
         frame_per_cycle :
-            number of frames for each circle
+            number of frames for each cycle
         """
+        static_frames = self.static_frame_num
 
         if tf == 0.:
             phases = [0.] * self.block_frame_num
             frame_per_cycle = self.block_frame_num
-
         else:
             frame_per_cycle = int(self.monitor.refresh_rate / tf)
-
             phases_per_cycle = list(np.arange(0, np.pi * 2, np.pi * 2 / frame_per_cycle))
 
             if self.is_random_start_phase:
                 start_ind = np.random.randint(low=len(phases_per_cycle), size=1)[0]
                 phases_per_cycle = phases_per_cycle[start_ind:] + phases_per_cycle[:start_ind]
 
+            drift_frame_num = self.block_frame_num - static_frames
             phases = []
-
-            while len(phases) < self.block_frame_num:
+            while len(phases) < drift_frame_num:
                 phases += phases_per_cycle
+            phases = phases[:drift_frame_num]
 
-            phases = phases[0: self.block_frame_num]
+        phases = [0.] * static_frames + phases
         return phases, frame_per_cycle
 
     @staticmethod
@@ -4659,7 +4520,7 @@ class DriftingGratingMultipleCircle(Stim):
                   contrast, [-1., 1.]
              seventh element -
                   size, float (radius of the circle in visual degree)
-             eighth element - 
+             eighth element -
                   center, a set of floats
              ninth element -
                   phase, [0, 2*pi)
@@ -4673,7 +4534,6 @@ class DriftingGratingMultipleCircle(Stim):
 
         frames = []
         off_params = [0, None, None, None, None, None, None, None, None, -1.]
-        # midgap_frames = int(self.midgap_dur*self.monitor.refresh_rate)
 
         for i in range(self.iteration):
             if i == 0:  # very first block
@@ -4692,8 +4552,6 @@ class DriftingGratingMultipleCircle(Stim):
 
                 # get phase list for each condition
                 phases, frame_per_cycle = self._generate_phase_list(tf)
-                # if (dire % 360.) >= 90. and (dire % 360. < 270.):
-                #      phases = [-phase for phase in phases]
 
                 for k, phase in enumerate(phases):  # each frame in the block
 
@@ -4731,31 +4589,53 @@ class DriftingGratingMultipleCircle(Stim):
                                          this particular condition
         """
         phases, frame_per_cycle = self._generate_phase_list(condi_params[1])
+        static_frames = self.static_frame_num
 
-        if condi_params[0] == 0.: # blank block
-
-            frames_unique_condi = ((1, 1, 0., 0., 0., 0., 0., (0.,0.), 0., 1.),
-                                   (1, 1, 0., 0., 0., 0., 0., (0.,0.), 0., 0.))
+        if condi_params[0] == 0.:  # blank block
+            frames_unique_condi = ((1, 1, 0., 0., 0., 0., 0., (0., 0.), 0., 1.),
+                                   (1, 1, 0., 0., 0., 0., 0., (0., 0.), 0., 0.))
             index_to_display_condi = [1] * self.block_frame_num
             index_to_display_condi[0] = 0
 
         else:
-
-            phases_unique = phases[0:frame_per_cycle]
-
             frames_unique_condi = []
+
+            if static_frames > 0:
+                # static period: indicator white on first frame only
+                frames_unique_condi.append([1, 1, condi_params[0], condi_params[1],
+                                            condi_params[2], condi_params[3],
+                                            condi_params[4], condi_params[5], 0., 1.])  # static on
+                frames_unique_condi.append([1, 0, condi_params[0], condi_params[1],
+                                            condi_params[2], condi_params[3],
+                                            condi_params[4], condi_params[5], 0., 0.])  # static off
+                static_on_ind = 0
+                static_off_ind = 1
+                drift_offset = 2
+            else:
+                drift_offset = 0
+
+            # drift frames: one unique cycle
+            drift_phases = phases[static_frames:]
+            phases_unique = drift_phases[0:frame_per_cycle]
             for i, ph in enumerate(phases_unique):
-                if i == 0:
-                    frames_unique_condi.append([1, 1, condi_params[0], condi_params[1], condi_params[2],
-                                                condi_params[3], condi_params[4], condi_params[5], ph, 1.])
-                else:
-                    frames_unique_condi.append([1, 0, condi_params[0], condi_params[1], condi_params[2],
-                                                condi_params[3], condi_params[4], condi_params[5], ph, 0.])
+                is_first = (i == 0)
+                frames_unique_condi.append([1, int(is_first),
+                                            condi_params[0], condi_params[1],
+                                            condi_params[2], condi_params[3],
+                                            condi_params[4], condi_params[5], ph,
+                                            1. if is_first else 0.])
 
             index_to_display_condi = []
-            while len(index_to_display_condi) < len(phases):
-                index_to_display_condi += range(frame_per_cycle)
-            index_to_display_condi = index_to_display_condi[0:len(phases)]
+
+            if static_frames > 0:
+                index_to_display_condi += [static_on_ind]                          # first static frame: white
+                index_to_display_condi += [static_off_ind] * (static_frames - 1)  # rest of static: off
+
+            drift_indices = []
+            while len(drift_indices) < (self.block_frame_num - static_frames):
+                drift_indices += list(range(drift_offset, drift_offset + frame_per_cycle))
+            drift_indices = drift_indices[:(self.block_frame_num - static_frames)]
+            index_to_display_condi += drift_indices
 
             frames_unique_condi = tuple([tuple(f) for f in frames_unique_condi])
 
@@ -4764,31 +4644,10 @@ class DriftingGratingMultipleCircle(Stim):
     def _generate_frames_unique_and_condi_ind_dict(self):
         """
         compute the information that defines the frames used for index display
-
-        :return frames_unique
-                the condi_ind_in_frames_unique:
-                    {
-                     condi_key (same condi_key as condi_dict):
-                           list of non-negative integers representing the indices of this
-                           particular condition in frames_unique
-                    }
         """
         if self.indicator.is_sync:
 
             all_conditions = self._generate_all_conditions()
-
-            '''
-            cond_dict is a dictionary constructed as following
-                {
-                condi_key (i.e. condi_0000):
-                     {
-                      'frames_unique': list of unique frame parameters for this particual condition
-                                       [is_display, is_first_in_cycle, sf, tf, dire,
-                                       con, size, center, phase, indicator_color],
-                      'index_to_display': list of non-negative integers,
-                     }
-                }
-            '''
 
             condi_dict = {}
             for i, condi in enumerate(all_conditions):
@@ -4869,7 +4728,6 @@ class DriftingGratingMultipleCircle(Stim):
     def generate_movie_by_index(self):
         """ compute the stimulus movie to be displayed by index. """
         self.frames_unique, self.index_to_display = self._generate_display_index()
-        # print '\n'.join([str(f) for f in self.frames_unique])
 
         mask_dict = self._generate_circle_mask_dict()
 
@@ -4901,8 +4759,6 @@ class DriftingGratingMultipleCircle(Stim):
         for i, frame in enumerate(self.frames_unique):
 
             if frame[0] == 1 and frame[2] != 0.:  # not a gap and not a blank block
-
-                # curr_ori = self._get_ori(frame[3])
 
                 curr_grating = get_grating(alt_map=coord_alt,
                                            azi_map=coord_azi,
@@ -4964,7 +4820,7 @@ class DriftingGratingMultipleCircle(Stim):
                                             is_smooth_edge=self.is_smooth_edge,
                                             blur_ratio=self.smooth_width_ratio,
                                             blur_func=self.smooth_func)
-                masks.update({(radius,) + center: curr_mask}) # nested dict with keys of radius and center coordinates
+                masks.update({(radius,) + center: curr_mask})
 
         return masks
 
@@ -4995,9 +4851,8 @@ class DriftingGratingMultipleCircle(Stim):
 
         for i, curr_frame in enumerate(self.frames):
 
-            if curr_frame[0] == 1 and curr_frame[2] != 0. :  # not a gap and not a blank block
+            if curr_frame[0] == 1 and curr_frame[2] != 0.:  # not a gap and not a blank block
 
-                # curr_ori = self._get_ori(curr_frame[4])
                 curr_grating = get_grating(alt_map=coord_alt,
                                            azi_map=coord_azi,
                                            dire=curr_frame[4],
@@ -5005,12 +4860,10 @@ class DriftingGratingMultipleCircle(Stim):
                                            center=curr_frame[7],
                                            phase=curr_frame[8],
                                            contrast=curr_frame[5])
-                # plt.imshow(curr_grating)
-                # plt.show()
 
                 curr_grating = curr_grating * 2. - 1.  # change scale from [0., 1.] to [-1., 1.]
 
-                curr_circle_mask = mask_dict[(curr_frame[6],) + curr_frame[7]] # (radius, center)
+                curr_circle_mask = mask_dict[(curr_frame[6],) + curr_frame[7]]
 
                 if self.inverse:
                     mov[i] = ((curr_grating * (curr_circle_mask * -1. + 1.)) +
@@ -5018,7 +4871,7 @@ class DriftingGratingMultipleCircle(Stim):
                 else:
                     mov[i] = ((curr_grating * curr_circle_mask) +
                             (background_frame * (curr_circle_mask * -1. + 1.)))
-                
+
             # add sync square for photodiode
             mov[i, indicator_height_min:indicator_height_max,
             indicator_width_min:indicator_width_max] = curr_frame[-1]
