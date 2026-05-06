@@ -19,7 +19,7 @@ expInfo = {
     'Protocol': search_protcol("./protocols"),
     'Saving location': [str(expanduser("~")), 'D:/SuKu_RawData'],
     'Plot map': True,
-    'TiffFile': ['natural_scenes_allen_downsampled.tiff', 'pokemon.tiff'],
+    'TiffFile': ['natural_scenes_allen_downsampled.tiff', 'pokemon_2fps_downsampled.tif'],
 }
 dlg = gui.DlgFromDict(dictionary=expInfo, title='WarpedVisualStim MFH', screen=0, sortKeys=False) # show dialog and wait for OK or Cancel
 if dlg.OK == False:
