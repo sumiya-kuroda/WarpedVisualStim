@@ -50,10 +50,15 @@ ind = Indicator(mon, width_cm=task_protocol["ind_width_cm"], height_cm=task_prot
 
 # ========================== StaticImages =====================================
 path_to_images = './tools/naturalscene/{}'.format(expInfo['TiffFile'])
+if 'pokemon' in path_to_images:
+    iter_this_stimulus = 1
+else:
+    iter_this_stimulus = task_protocol["si_iteration"]
+
 dgc = stim.StaticImages(monitor=mon, indicator=ind, background=task_protocol["background"],
                         coordinate=task_protocol["coordinate"], path_images=path_to_images, img_center=task_protocol["si_img_center"], 
                         deg_per_pixel=task_protocol["si_deg_per_pixel"], display_dur=task_protocol["si_display_dur"], 
-                        midgap_dur=task_protocol["si_midgap_dur"], iteration=task_protocol["si_iteration"], 
+                        midgap_dur=task_protocol["si_midgap_dur"], iteration=iter_this_stimulus, 
                         pregap_dur=task_protocol["si_pregap_dur"], postgap_dur=task_protocol["si_postgap_dur"], is_blank_block=True)
 
 warped_image = os.path.splitext(path_to_images)[0] + '.h5'
