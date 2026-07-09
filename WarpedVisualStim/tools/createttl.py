@@ -17,7 +17,7 @@ class TTLGenerator():
     def makeLOW(self):
         _ = self.syncPulseTask.write(np.array([0]).astype(np.uint8))
 
-    def runTTLCycle(self, frequency=60, rec_time_s=10000):
+    def runTTLCycle(self, frequency=60, rec_time_s=20000):
         print(f'starting camera TTL | {frequency} Hz | {rec_time_s} s')
         on_time = 0.01
         off_time = 1/frequency - on_time
