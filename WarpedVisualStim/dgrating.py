@@ -48,7 +48,8 @@ ind = Indicator(mon, width_cm=task_protocol["ind_width_cm"], height_cm=task_prot
 
 # ========================== DriftingGratingCircle =====================================
 dgc = stim.DriftingGratingMultipleCircle(monitor=mon, indicator=ind, background=task_protocol["background"],
-                                 coordinate=task_protocol["coordinate"], center_list=make_nested_lst_of_tuples(task_protocol["dgmc_center_list"]), sf_list=task_protocol["dgmc_sf_list"],
+                                 coordinate=task_protocol["coordinate"], center_list=make_nested_lst_of_tuples(task_protocol["dgmc_center_list"]) if expInfo['Warp stimulus'] else [(0., 0.)],
+                                 sf_list=task_protocol["dgmc_sf_list"],
                                  tf_list=task_protocol["dgmc_tf_list"], dire_list=task_protocol["dgmc_direction_list"], con_list=task_protocol["dgmc_contrast_list"], radius_list=task_protocol["dgmc_radius_list"],
                                  static_dur=task_protocol["dgmc_static_dur"], block_dur=task_protocol["dgmc_block_dur"], midgap_dur=task_protocol["dgmc_midgap_dur"], is_smooth_edge=task_protocol["dgmc_is_smooth_edge"], iteration=task_protocol["dgmc_iteration"], pregap_dur=task_protocol["dgmc_pregap_dur"],
                                  postgap_dur=task_protocol["dgmc_postgap_dur"], is_blank_block=task_protocol["dgmc_is_blank_block"], is_random_start_phase=task_protocol["dgmc_is_random_start_phase"],

@@ -112,7 +112,10 @@ if postprocess_settings['format'] == 'neuroblueprint':
         print('Loading {}'.format(local_log_path + '/' + local_log_fname + '.pkl'))
         dla = DisplayLogAnalyzer(local_log_path + '/' + local_log_fname + '.pkl')
         stim_dict = dla.get_stim_dict()
-        pd_onsets_seq = dla.analyze_photodiode_onsets_sequential(stim_dict, pd_thr=-0.5)
+        if 'StaticImages' in local_log_fname:
+            pd_onsets_seq = dla.analyze_photodiode_onsets_sequential(stim_dict, pd_thr=0.5)
+        else:
+            pd_onsets_seq = dla.analyze_photodiode_onsets_sequential(stim_dict, pd_thr=-0.5)
         pd_onsets_combined = dla.analyze_photodiode_onsets_combined(pd_onsets_seq)
         saveFile(local_log_path + '/' + local_log_fname + '_pd_onsets_combined.pkl', pd_onsets_combined)
         if postprocessInfo["Upload data to server?"]:
