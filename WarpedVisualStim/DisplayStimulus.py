@@ -15,6 +15,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 from .tools import FileTools as ft
+from .tools.GammaTools import load_gamma_calibration, stim_to_display
 import tifffile as tf
 
 try:
@@ -162,6 +163,13 @@ class DisplaySequence(object):
             element is in the range [0., 1.]. This is designed in such way that
             if you want to suppress a certain channel i.e. red channel, you can
             change this parameter to (0., 1., 1.)
+        gamma_calib : str, optional
+            name of the PsychoPy gamma calibration of `psychopy_mon` to use.
+            defaults to `None` (the most recent calibration).
+        luminance : list/tuple of two floats, optional
+            target luminance (black, white) in cd/m2. Stimulus values -1 and 1
+            are shown at these luminances (0 at their mean). defaults to `None`,
+            i.e. -1/1 map to the monitor's full measured range.
     """
 
     def __init__(self,
@@ -188,7 +196,9 @@ class DisplaySequence(object):
                  display_screen=0,
                  nonused_screen=None,
                  initial_background_color=0.,
-                 color_weights=(1., 1., 1.)
+                 color_weights=(1., 1., 1.),
+                 gamma_calib=None,
+                 luminance=None
                  ):
 
         """
@@ -200,6 +210,8 @@ class DisplaySequence(object):
         self.identifier = str(identifier)
         self.psychopy_mon = psychopy_mon
         self.psychopy_nonused_mon = psychopy_nonused_mon
+        self.gamma_calib = gamma_calib
+        self.luminance = luminance
         self.is_interpolate = is_interpolate
         self.is_triggered = is_triggered
         self.is_by_index = is_by_index
@@ -411,7 +423,8 @@ class DisplaySequence(object):
                                fullscr=True,
                                gamma=1.0,
                                screen=self.display_screen,
-                               color=self.initial_background_color)
+                               color=self._apply_gamma_correction(
+                                   self.initial_background_color, verbose=False).tolist())
         
         stim = visual.ImageStim(window, size=(2, 2), interpolate=self.is_interpolate)
 
@@ -461,26 +474,24 @@ class DisplaySequence(object):
 
         return save_path, log_dict
 
-    def _apply_gamma_correction(self, sequence):
-        mon = monitors.Monitor(self.psychopy_mon)
-        print("Monitor: {}".format(self.psychopy_mon))
-        print("Using calibration: {}".format(mon.currentCalib))
-        
-        gamma_grid = mon.getGammaGrid()
-        
+    def _apply_gamma_correction(self, sequence, verbose=True):
+        """
+        Convert stimulus values in [-1, 1] to display values in [-1, 1]:
+        1. (if self.luminance is set) remap -1/+1 to the target luminance
+           range self.luminance (cd/m2), relative to the monitor's measured
+           physical range from the gamma calibration;
+        2. apply inverse gamma correction.
+        """
+        _, calib_name, gamma_grid = load_gamma_calibration(self.psychopy_mon,
+                                                           self.gamma_calib,
+                                                           verbose=verbose)
+
         if gamma_grid is None:
-            print("Warning: no gamma calibration found, skipping correction.")
+            print("Warning: no gamma calibration found, skipping luminance "
+                  "remap and gamma correction.")
             return sequence
 
-        # row 0 = mean/luminance, row 1=R, 2=G, 3=B; col 2 = gamma exponent
-        gamma_mean = gamma_grid[0, 2]
-        print("Gamma grid:\n  R={:.4f}, G={:.4f}, B={:.4f}, mean={:.4f}".format(
-            gamma_grid[1, 2], gamma_grid[2, 2], gamma_grid[3, 2], gamma_mean))
-        print("Applying inverse gamma correction: gamma={:.4f}".format(gamma_mean))
-
-        seq_01 = np.clip((sequence.astype(np.float32) + 1.) / 2., 0., 1.)
-        seq_corrected = np.power(seq_01, 1.0 / gamma_mean)
-        return seq_corrected * 2. - 1.
+        return stim_to_display(sequence, gamma_grid, self.luminance, verbose=verbose)
 
     def _wait_for_trigger(self, event):
         """

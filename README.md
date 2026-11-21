@@ -65,10 +65,10 @@ You need to gamma correct the monitors then. You can use PsychoPy's function for
 #### Gamma correction
 While PsychoPy supports gamma correction, there is a bug with Windows 10 at the moment, which you cannot use dual or triple monitor setup (unless you duplicate one monitor). Hence we use alternative approach to hijack OpenGL process.
 
-1. Disconnect all the other monitors, and plug ColorCAL3 into USB. Launch Monitor Center and start Gamma calibration.
+1. Disconnect all the other monitors, and plug ColorCAL3 into USB. Launch Monitor Center and start Gamma calibration. `python WarpedVisualStim\gamma\monitor_center.py`.
 2. Check the gamma values and plot it. Remove old table.
 3. Reconnect all the other monitors.
-4. Use gamma/rectangles.py to measure the luminance level.
+4. Use gamma/rectangles.py to check the gamma-corrected luminance levels. python gamma\rectangles.py --protocol wf-370_skuroda
 
 #### Dependencies:
 1. pytest
@@ -99,3 +99,8 @@ install page in documentation (`doc` branch).
 4. You can launch PsychoPy GUI by simply running `psychopy` but ***only when you use Windows cmd***. For whatever reason, it does not work with Git bash.
 5. It occasionally ends up with a weird bug with an error msg `ctypes.ArgumentError: argument 1: <class 'OverflowError'>: int too long to convert`. For now, just ignore the msg and restart the conda environemnt. This should fix the problem.
 6. If you are connecting the PC using remote desktop services such as RustDesk, the `psychopy` gives you warning messages `Couldn't measure a consistent frame rate!` at the end of the stimuli.
+In PsychoPy, go to File → Preferences → Hardware and set defaultGammaFailPolicy to warn or ignore, then restart.
+Open regedit and go to
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ICM
+Create a DWORD (32-bit) value named GdiIcmGammaRange and set it to 256 (decimal).
+Reboot.

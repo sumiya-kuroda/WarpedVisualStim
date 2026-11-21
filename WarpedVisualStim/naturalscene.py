@@ -35,7 +35,9 @@ mon = Monitor(resolution=task_protocol["mon_resolution"], dis=task_protocol["mon
               mon_height_cm=task_protocol["mon_height_cm"], C2T_cm=task_protocol["mon_height_cm"] /2, C2A_cm=task_protocol["mon_width_cm"] /2,
               visual_field='left',
               center_coordinates=(0., 50.),
-              downsample_rate=task_protocol["mon_downsample_rate"])
+              downsample_rate=task_protocol["mon_downsample_rate"],
+              luminance=task_protocol["mon_luminance"],  # target black/white cd/m2
+              gamma_calib=task_protocol.get("gamma_calib"))  # None = most recent calibration
 if expInfo['Plot map']:
     mon.plot_map()
     plt.show()
@@ -72,7 +74,7 @@ dgc.set_imgs_from_hdf5(warped_image)
 # ================ Initialize the DisplaySequence object ==========================
 ds = DisplaySequence(log_dir=expInfo['Saving location'], backupdir=None, identifier=expInfo['Identifier'], display_iter=task_protocol["ds_display_iter"],
                      mouse_id=expInfo['Mouse ID'], user_id=expInfo['User ID'],
-                     psychopy_mon=task_protocol["ds_stimulus_mon"],display_screen=task_protocol["ds_stimulus_screen"],
+                     psychopy_mon=task_protocol["ds_stimulus_mon"], gamma_calib=task_protocol.get("gamma_calib"), luminance=task_protocol["mon_luminance"],display_screen=task_protocol["ds_stimulus_screen"],
                      psychopy_nonused_mon=task_protocol["ds_nonused_mon"], nonused_screen=task_protocol["ds_nonused_screen"],
                      is_by_index=True,is_interpolate=task_protocol["ds_is_interpolate"],is_triggered=task_protocol["ds_is_triggered"],
                      trigger_event=task_protocol["ds_trigger_event"], trigger_NI_dev=task_protocol["ds_trigger_NI_dev"],

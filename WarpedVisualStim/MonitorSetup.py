@@ -52,11 +52,15 @@ class Monitor(object):
     gamma_grid : optional
          for gamme correction, defaults to `None`
     luminance : optional
-         monitor luminance, defaults to `None` target range (0., 20.) cd/m2 — you set this
+         target luminance (black, white) in cd/m2, kept here so it is saved in the
+         stimulus log. The mapping itself is done by `DisplaySequence(luminance=...)`.
     downsample_rate : int, optional
          downsample rate of monitor pixels, defaults to 10
     refresh_rate : float, optional
         the refresh rate of the monitor in Hz, defaults to 60
+    gamma_calib : str, optional
+        name of the PsychoPy gamma calibration of monitor `name` to read the
+        luminance range from, defaults to `None` (the most recent calibration)
     """
 
     def __init__(self,
@@ -73,9 +77,10 @@ class Monitor(object):
                  name='testMonitor',
                  gamma=None,
                  gamma_grid=None,
-                 luminance=(0.15,17), #TODO: add to config
+                 luminance=(0.15,17),  # default; set per protocol with "mon_luminance"
                  downsample_rate=10,
-                 refresh_rate=60.):
+                 refresh_rate=60.,
+                 gamma_calib=None):
         """
         Initialize monitor object.
 
@@ -137,7 +142,9 @@ class Monitor(object):
         self.lin_coord_x = old_map_x
         self.lin_coord_y = old_map_y
 
-        self.set_luminance_from_psychopy(self.name)  # reads physical range from calibration
+        self.gamma_calib = gamma_calib
+        # reads physical range from calibration (most recent if gamma_calib is None)
+        self.set_luminance_from_psychopy(self.name, self.gamma_calib)
         self.remap()
 
     def set_gamma(self, gamma, gamma_grid):
@@ -440,21 +447,8 @@ class Monitor(object):
                 curr_frame = curr_frame - curr_mean
                 curr_amp = np.max([np.nanmax(curr_frame.flat), abs(np.nanmin(curr_frame.flat))])
                 curr_frame = curr_frame / curr_amp  # now in [-1, 1]
-
-                if self.luminance is not None and self.luminance_range is not None:
-                    lum_target_min, lum_target_max = self.luminance       # your target
-                    lum_min, lum_max = self.luminance_range               # physical range
-                    # step 1: [-1,1] -> [0,1]
-                    curr_frame_01 = (curr_frame + 1.) / 2.
-                    # step 2: [0,1] -> target cd/m2
-                    curr_frame_lum = curr_frame_01 * (lum_target_max - lum_target_min) + lum_target_min
-                    # step 3: target cd/m2 -> [0,1] normalized by monitor range
-                    curr_frame_01 = (curr_frame_lum - lum_min) / (lum_max - lum_min)
-                    # step 4: [0,1] -> [-1,1]
-                    curr_frame = curr_frame_01 * 2. - 1.
-                    print("Luminance remap: black={:.2f}, gray={:.2f}, white={:.2f} cd/m2".format(
-                        lum_target_min, (lum_target_min + lum_target_max) / 2., lum_target_max))
-
+                # mapping to target luminance (cd/m2) and gamma correction are
+                # done for all stimuli in DisplaySequence._apply_gamma_correction
                 imgs_wrapped[frame_ind] = curr_frame
 
         # crop image
@@ -485,13 +479,9 @@ class Monitor(object):
                deg_coord_azi_dewrapped
 
     def set_luminance_from_psychopy(self, psychopy_mon_name, calibration_name=None):
-        from psychopy import monitors as psychopy_monitors
-        mon = psychopy_monitors.Monitor(psychopy_mon_name)
-        if calibration_name is not None:
-            mon.setCurrent(calibration_name)
-        print("Reading luminance from: {}, calibration: {}".format(
-            psychopy_mon_name, mon.currentCalib))
-        gamma_grid = mon.getGammaGrid()
+        from .tools.GammaTools import load_gamma_calibration
+        _, _, gamma_grid = load_gamma_calibration(psychopy_mon_name,
+                                                  calibration_name)
         if gamma_grid is None:
             print("Warning: no gamma calibration found for '{}', "
                 "luminance_range not set.".format(psychopy_mon_name))

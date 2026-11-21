@@ -47,7 +47,9 @@ mon = Monitor(resolution=task_protocol["mon_resolution"],
               visual_field='left',
               center_coordinates=(0., 45.),
               downsample_rate=task_protocol["mon_downsample_rate"],
-              name=task_protocol["ds_stimulus_mon"])
+              name=task_protocol["ds_stimulus_mon"],
+              luminance=task_protocol["mon_luminance"],  # target black/white cd/m2
+              gamma_calib=task_protocol.get("gamma_calib"))  # None = most recent calibration
 
 ind = Indicator(mon,
                 width_cm=task_protocol["ind_width_cm"],
@@ -82,7 +84,7 @@ ds = DisplaySequence(log_dir=expInfo['Saving location'],
                      identifier=expInfo['Identifier'],
                      mouse_id=expInfo['Mouse ID'],
                      user_id=expInfo['User ID'],
-                     psychopy_mon=task_protocol["ds_stimulus_mon"],
+                     psychopy_mon=task_protocol["ds_stimulus_mon"], gamma_calib=task_protocol.get("gamma_calib"),
                      psychopy_nonused_mon=task_protocol["ds_nonused_mon"],
                      nonused_screen=task_protocol["ds_nonused_screen"],
                      display_screen=task_protocol["ds_stimulus_screen"],
